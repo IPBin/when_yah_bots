@@ -43,3 +43,9 @@ dedup_angle_deg: 30.0
 # runtime
 verbose: true
 log_rejections: true        # log every rejected candidate with its reason
+
+# visual report (§9.1, §9.2)
+report_axial_half_window_mm: 40.0   # axial-slice strip crop half-width around the centreline
+report_arrow_length_mm: 10.0        # direction-arrow length drawn on MIPs / axial slices
+report_marker_min_pt: 4.0           # unrolled-map circle size floor (points)
+report_marker_scale_pt: 6.0         # unrolled-map circle size per mm of radius (points/mm)
