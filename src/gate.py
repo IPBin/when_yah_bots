@@ -4,6 +4,8 @@ Stage 9 (§5.9): eligibility gate and de-duplication.
 Owner: P1.
 """
 
+import numpy as np
+
 from src.instances import RawBranch
 from src.geometry import BranchGeom
 from src.intensity import Profile
@@ -27,7 +29,24 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         "too_tortuous", "insufficient_extent"), always populated and logged
         when cfg['log_rejections'].
     """
-    raise NotImplementedError
+    if raw.geodesic_extent_mm < float(cfg["min_extent_mm"]):
+        return False, "insufficient_extent"
+    if geom.radius_mm < float(cfg["min_radius_mm"]):
+        return False, "below_min_radius"
+    if raw.patch_area_mm2 < float(cfg["patch_area_min_mm2"]):
+        return False, "patch_too_small"
+    if raw.patch_area_mm2 > float(cfg["patch_area_max_mm2"]):
+        return False, "patch_too_large"
+    if raw.hu_ratio < float(cfg["hu_ratio_min"]):
+        return False, "low_hu_ratio"
+    if geom.tortuosity > float(cfg["tortuosity_max"]):
+        return False, "too_tortuous"
+    return True, "ok"
+
+
+def _direction_angle_deg(d1: np.ndarray, d2: np.ndarray) -> float:
+    cosang = float(np.clip(np.dot(d1, d2), -1.0, 1.0))
+    return float(np.degrees(np.arccos(cosang)))
 
 
 def dedup(items: list, cfg: dict) -> list:
@@ -47,4 +66,43 @@ def dedup(items: list, cfg: dict) -> list:
         cfg['dedup_angle_deg']. Bias toward keeping items split, per
         playbook §5.7 (the brief separates nearby real origins).
     """
-    raise NotImplementedError
+    n = len(items)
+    if n == 0:
+        return []
+
+    dedup_dist_mm = float(cfg["dedup_dist_mm"])
+    dedup_angle_deg = float(cfg["dedup_angle_deg"])
+
+    parent = list(range(n))
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: int, b: int) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    for i in range(n):
+        _, gi = items[i]
+        for j in range(i + 1, n):
+            _, gj = items[j]
+            dist = float(np.linalg.norm(gi.ostium_mm - gj.ostium_mm))
+            if dist > dedup_dist_mm:
+                continue  # merge requires BOTH close position AND similar direction
+            if _direction_angle_deg(gi.direction, gj.direction) < dedup_angle_deg:
+                union(i, j)
+
+    clusters = {}
+    for i in range(n):
+        clusters.setdefault(find(i), []).append(i)
+
+    merged = []
+    for idxs in clusters.values():
+        # keep the instance with the largest (most confident) contact patch
+        best = max(idxs, key=lambda k: items[k][0].patch_area_mm2)
+        merged.append(items[best])
+    return merged

@@ -20,6 +20,7 @@ centreline_smooth_mm: 10.0
 endcap_mm: 4.0              # exclude wall within this of the mask's top/bottom
 endcap_angle_deg: 35.0      # exclude wall whose normal aligns with the axis
 iliac_margin_mm: 3.0
+iliac_fork_size_ratio: 0.3  # 2D slice components with size ratio >= this count as "comparable" (the fork)
 
 # branch tracing
 trace_max_mm: 10.0
