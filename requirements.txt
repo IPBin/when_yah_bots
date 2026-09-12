@@ -1,0 +1,6 @@
+SimpleITK==2.5.6
+numpy==2.5.3
+scipy==1.18.1
+scikit-image==0.26.0
+PyYAML==6.0.3
+matplotlib==3.11.2
