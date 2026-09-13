@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+body{margin:0;overflow-x:hidden;background:#f7e8ea;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#d6003f;text-decoration:none}a:hover{color:#8f0029}
+::selection{background:#ffd2dd}
+html{scroll-behavior:smooth}
+section,header{scroll-margin-top:24px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+
+<div style="box-sizing:border-box;width:100%;max-width:1440px;margin:0 auto;padding:48px 32px 80px;display:flex;flex-direction:column;gap:64px;background:
+radial-gradient(900px 460px at 12% 0%,rgba(214,0,63,.13),transparent 62%),
+radial-gradient(1000px 520px at 92% 38%,rgba(255,125,151,.16),transparent 64%),
+linear-gradient(to right,rgba(214,0,63,.055) 1px,transparent 1px) 0 0/96px 96px,
+linear-gradient(to bottom,rgba(214,0,63,.055) 1px,transparent 1px) 0 0/96px 96px,
+linear-gradient(175deg,#fff6f7,#fdeef0 55%,#fbe6ea);">
+
+<header id="top" style="width:100%;box-sizing:border-box;display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr)) auto;align-items:center;gap:20px;row-gap:18px;padding:0 4px 4px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:22px;height:22px;border-radius:50%;background:#d6003f"></div>
+    <span style="font:600 21px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.015em;color:#0b1220">Branchseed</span>
+  </div>
+  <a href="#top" style="border-top:1px solid rgba(11,18,32,.22);padding-top:16px;font:400 17px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap;text-decoration:none;display:block;transition:color .2s ease" style-hover="color:#d6003f">Home</a>
+  <a href="#upload" style="border-top:1px solid rgba(11,18,32,.22);padding-top:16px;font:400 17px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap;text-decoration:none;display:block;transition:color .2s ease" style-hover="color:#d6003f">How it works</a>
+  <a href="#cases" style="border-top:1px solid rgba(11,18,32,.22);padding-top:16px;font:400 17px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap;text-decoration:none;display:block;transition:color .2s ease" style-hover="color:#d6003f">Cases</a>
+  <a href="#method" style="border-top:1px solid rgba(11,18,32,.22);padding-top:16px;font:400 17px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap;text-decoration:none;display:block;transition:color .2s ease" style-hover="color:#d6003f">Method</a>
+  <div style="display:flex;align-items:center;gap:6px">
+    <a href="#upload" style="padding:15px 28px;border:1px solid rgba(11,18,32,.28);border-radius:999px;font:400 16px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap;text-decoration:none">Open a case</a>
+    <a href="#upload" style="width:50px;height:50px;border-radius:50%;border:1px solid rgba(11,18,32,.28);display:flex;align-items:center;justify-content:center;font:400 18px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;text-decoration:none">↗</a>
+  </div>
+</header>
+
+<div style="position:relative;width:100%;border-radius:18px;overflow:hidden;border:1px solid rgba(11,18,32,.08)">
+  <img src="assets/hero-banner.png" alt="Aortic branch origins" style="width:100%;height:auto;display:block">
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:32px 36px 30px;display:flex;flex-direction:column;gap:12px;max-width:720px;background:linear-gradient(to top,rgba(255,255,255,.96) 40%,rgba(255,255,255,0))">
+        <h1 style="margin:0;font:700 clamp(34px,5vw,64px)/0.98 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.035em;color:#0b1220;text-wrap:balance">Aortic daughter-branch<br>detection console.</h1>
+    <p style="margin:2px 0 0;max-width:580px;font:400 16px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Branches sit differently in every patient, so the tool finds them instead of looking them up. Four screens, one case: upload, run, check, export.</p>
+  </div>
+</div>
+
+<!-- 01 UPLOAD -->
+<section id="upload" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#0b1220;color:#fff;padding:5px 8px;border-radius:5px">01</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">New case — upload & configure</span>
+<span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#7a8593">POST /api/cases</span>
+</div>
+
+<div style="width:100%;background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;padding:18px 28px;border-bottom:1px solid rgba(11,18,32,.09)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:22px;height:22px;border-radius:50%;background:#d6003f"></div>
+      <span style="font:600 17px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.01em;color:#0b1220">Branchseed</span>
+    </div>
+    <nav style="display:flex;gap:36px;font:400 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">
+      <span style="color:#0b1220;font-weight:500">New case</span><span>Cases</span><span>Runs</span><span>Docs</span>
+    </nav>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border:1px solid rgba(11,18,32,.22);border-radius:999px;font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap">API status <span style="width:7px;height:7px;border-radius:50%;background:#d6003f"></span></div>
+      <div style="width:34px;height:34px;border-radius:50%;background:#eef1f5;border:1px solid rgba(11,18,32,.14);display:flex;align-items:center;justify-content:center;font:500 12px/1.4 ui-monospace,monospace;color:#0b1220">AB</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(230px,1fr);gap:0">
+    <div style="padding:34px 32px 38px;display:flex;flex-direction:column;gap:26px;border-right:1px solid rgba(11,18,32,.09)">
+      <div>
+        <h2 style="margin:0 0 6px;font:700 34px/1.05 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.03em;color:#0b1220">Submit a case</h2>
+        <p style="margin:0;font:400 14px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673;max-width:520px">Drop in the scan and the aorta mask. Same grid, no manual clicks.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <label style="border:1px solid rgba(11,18,32,.14);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;background:#fbfcfe;cursor:pointer">
+          <input type="file" accept=".nii,.nii.gz,.gz" onChange="{{ onCt }}" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font:500 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">CT volume</span>
+            <span style="font:400 11px/1.4 ui-monospace,monospace;color:{{ ctColor }}">{{ ctState }}</span>
+          </div>
+          <div style="min-height:96px;box-sizing:border-box;border:1px dashed rgba(11,18,32,.24);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px;background:repeating-linear-gradient(45deg,rgba(214,0,63,.04) 0 6px,transparent 6px 12px)">
+            <span style="font:400 12px/1.3 ui-monospace,monospace;color:#5b6673;overflow-wrap:anywhere">{{ ctName }}</span>
+            <span style="font:400 11px/1.4 ui-monospace,monospace;color:#8a93a0">{{ ctMeta }}</span>
+          </div>
+          <div style="font:400 11px/1.4 ui-monospace,monospace;color:#8a93a0">Click to choose · kept on this device</div>
+        </label>
+        <label style="border:1px solid rgba(214,0,63,.35);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;background:#fff6f8;cursor:pointer">
+          <input type="file" accept=".nii,.nii.gz,.gz" onChange="{{ onMask }}" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font:500 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Parent aorta mask</span>
+            <span style="font:400 11px/1.4 ui-monospace,monospace;color:{{ maskColor }}">{{ maskState }}</span>
+          </div>
+          <div style="min-height:96px;box-sizing:border-box;border:1px dashed rgba(214,0,63,.4);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px">
+            <span style="font:400 12px/1.3 ui-monospace,monospace;color:#d6003f;overflow-wrap:anywhere">{{ maskName }}</span>
+            <span style="font:400 11px/1.4 ui-monospace,monospace;color:#c4808f">{{ maskMeta }}</span>
+          </div>
+          <div style="font:400 11px/1.4 ui-monospace,monospace;color:#c4808f">binary · 1 = aorta</div>
+        </label>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">DETECTION PARAMETERS</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div style="border:1px solid rgba(11,18,32,.12);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+            <span style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Min. traceable length</span>
+            <span style="font:600 22px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">{{ minLen }} <span style="font-size:13px;color:#8a93a0">mm</span></span>
+            <input type="range" min="2" max="12" step="0.5" value="{{ minLen }}" onInput="{{ onMinLen }}" style="width:100%;accent-color:#d6003f;cursor:pointer">
+          </div>
+          <div style="border:1px solid rgba(11,18,32,.12);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+            <span style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Proximal trace cap</span>
+            <span style="font:600 22px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">{{ traceCap }} <span style="font-size:13px;color:#8a93a0">mm</span></span>
+            <input type="range" min="5" max="25" step="0.5" value="{{ traceCap }}" onInput="{{ onTraceCap }}" style="width:100%;accent-color:#d6003f;cursor:pointer">
+          </div>
+          <div style="border:1px solid rgba(11,18,32,.12);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+            <span style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Min. ostium radius</span>
+            <span style="font:600 22px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">{{ minRadius }} <span style="font-size:13px;color:#8a93a0">mm</span></span>
+            <input type="range" min="0.5" max="4" step="0.1" value="{{ minRadius }}" onInput="{{ onMinRadius }}" style="width:100%;accent-color:#d6003f;cursor:pointer">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+            <div onClick="{{ t.toggle }}" style="display:flex;align-items:center;gap:9px;padding:9px 14px;border-radius:999px;background:#f5f0f2;cursor:pointer;font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;transition:background .2s ease;color:{{ t.color }}"><span style="width:26px;height:15px;border-radius:999px;position:relative;display:inline-block;transition:background .2s ease;background:{{ t.track }}"><span style="position:absolute;top:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .2s ease;left:{{ t.knob }}"></span></span> {{ t.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;padding-top:4px;flex-wrap:wrap">
+        <div onClick="{{ onRun }}" style="display:flex;align-items:center;gap:2px;cursor:pointer">
+          <div style="padding:14px 26px;border-radius:999px;background:#d6003f;color:#fff;font:500 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap">{{ runLabel }}</div>
+          <div style="width:46px;height:46px;border-radius:50%;background:#d6003f;color:#fff;display:flex;align-items:center;justify-content:center;font:400 16px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif">↗</div>
+        </div>
+        <span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">{{ runHint }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;background:#f7f2f4;border:1px solid rgba(214,0,63,.14)">
+        <span style="font:400 12px/1.4 ui-monospace,monospace;color:#8a6572">{{ savedLine }}</span>
+        <span onClick="{{ onClear }}" style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#d6003f;cursor:pointer;white-space:nowrap">Clear saved data</span>
+      </div>
+    </div>
+
+    <div style="padding:34px 30px;background:#fafbfd;display:flex;flex-direction:column;gap:22px">
+      <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">VALIDATION</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:#d6003f;font:600 13px/1.4 monospace">✓</span><span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Mask is binary, one lumen</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:#d6003f;font:600 13px/1.4 monospace">✓</span><span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Image and mask line up</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:#d6003f;font:600 13px/1.4 monospace">✓</span><span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Contrast looks good (268 HU in the lumen)</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:#c47a00;font:600 13px/1.4 monospace">!</span><span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Only 118 mm of aorta covered. Expect fewer branches.</span></div>
+      </div>
+      <div style="height:1px;background:rgba(11,18,32,.09)"></div>
+      <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">CLI EQUIVALENT</div>
+      <div style="background:#0b1220;border-radius:12px;padding:16px 18px;font:400 11.5px/1.7 ui-monospace,Menlo,monospace;color:#e8d3d8;overflow:hidden">python run.py \<br>&nbsp;&nbsp;--image orig1.nii.gz \<br>&nbsp;&nbsp;--aorta-mask mask1.nii.gz \<br>&nbsp;&nbsp;--output prediction.json</div>
+      <div style="font:400 12px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">Same arguments, same result from a terminal.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 02 RUN -->
+<section id="run" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#0b1220;color:#fff;padding:5px 8px;border-radius:5px">02</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Run monitor</span>
+<span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#7a8593">GET /api/runs/:id — SSE stream</span>
+</div>
+
+<div style="width:100%;box-sizing:border-box;background:#0b1220;border-radius:18px;padding:36px 36px 34px;display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,330px);gap:36px;color:#fff">
+  <div style="display:flex;flex-direction:column;gap:26px">
+    <div style="display:flex;align-items:baseline;gap:16px">
+      <h2 style="margin:0;font:700 36px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.03em">subject014</h2>
+      <span style="font:400 13px/1.4 ui-monospace,monospace;color:#c0929c">run_8c21 · started 14:02:51</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#d3aeb7"><span style="white-space:nowrap">STAGE 4 OF 6 — CANDIDATE SEARCH</span><span style="white-space:nowrap">00:31 elapsed</span></div>
+      <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;overflow:hidden"><div style="position:absolute;inset:0 38% 0 0;background:#ff6b85;border-radius:3px"></div></div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;font:400 11px/1.3 ui-monospace,monospace">
+        <div style="color:#ff6b85">✓ load</div><div style="color:#ff6b85">✓ resample</div><div style="color:#ff6b85">✓ wall shell</div><div style="color:#fff">● candidates</div><div style="color:#9a7d85">trace</div><div style="color:#9a7d85">export</div>
+      </div>
+    </div>
+    <div style="background:#080d17;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 20px;font:400 11.5px/1.9 ui-monospace,Menlo,monospace;color:#dcbfc6;min-height:220px;box-sizing:border-box;overflow:hidden">
+      <div>[14:02:51] loaded orig14.nii.gz — 512×512×388, spacing (0.74, 0.74, 1.00)</div>
+      <div>[14:02:53] aorta mask: 1 component, 41 912 voxels, extent 186.0 mm</div>
+      <div>[14:02:58] wall shell dilated 3.0 mm, end faces excluded (z=0, z=387)</div>
+      <div>[14:03:06] vesselness filter σ = [1.0, 1.6, 2.4, 3.2] mm</div>
+      <div style="color:#fff0f3">[14:03:18] 11 raw candidates → 7 after wall-contact test</div>
+      <div style="color:#ff6b85">[14:03:22] tracing proximal paths, 10 mm cap…</div>
+      <div style="color:#ff6b85">[14:03:22] branch_003 hit bifurcation at 6.4 mm — trace truncated</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="padding:12px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.28);font:500 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap">Cancel run</div>
+      <div style="padding:12px 22px;border-radius:999px;background:#ff6b85;color:#2e0010;font:500 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap">Open partial results</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#c0929c">RESOURCE BUDGET</div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#ffdbe3"><span style="white-space:nowrap">Runtime</span><span style="white-space:nowrap">31 s / 60 s target</span></div><div style="height:4px;background:rgba(255,255,255,.12);border-radius:2px;position:relative"><div style="position:absolute;inset:0 48% 0 0;background:#ff6b85;border-radius:2px"></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#ffdbe3"><span style="white-space:nowrap">Peak memory</span><span style="white-space:nowrap">3.9 GB / 8 GB</span></div><div style="height:4px;background:rgba(255,255,255,.12);border-radius:2px;position:relative"><div style="position:absolute;inset:0 51% 0 0;background:#ff6b85;border-radius:2px"></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#ffdbe3"><span style="white-space:nowrap">CPU cores</span><span style="white-space:nowrap">4 / 4</span></div><div style="height:4px;background:rgba(255,255,255,.12);border-radius:2px;position:relative"><div style="position:absolute;inset:0 0 0 0;background:#ff6b85;border-radius:2px"></div></div></div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+    <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#c0929c">QUEUE</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font:400 12.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif">
+      <div style="display:flex;justify-content:space-between;color:#fff0f3"><span>subject014</span><span style="color:#ff6b85">running</span></div>
+      <div style="display:flex;justify-content:space-between;color:#d3aeb7"><span>subject015</span><span>queued</span></div>
+      <div style="display:flex;justify-content:space-between;color:#d3aeb7"><span>subject016</span><span>queued</span></div>
+      <div style="display:flex;justify-content:space-between;color:#d3aeb7"><span>subject017</span><span>queued</span></div>
+    </div>
+    <div style="margin-top:auto;font:400 12px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#c0929c">Batch mode runs every case with the same settings.</div>
+  </div>
+</div>
+</section>
+
+<!-- 03 REVIEW -->
+<section id="review" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#0b1220;color:#fff;padding:5px 8px;border-radius:5px">03</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Review — the visual check</span>
+<span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#7a8593">click a branch row to select · GET /api/cases/:id/prediction</span>
+</div>
+
+<div style="width:100%;background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid rgba(11,18,32,.09)">
+    <div style="display:flex;align-items:baseline;gap:14px">
+      <span style="font:700 20px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.02em;color:#0b1220">subject001</span>
+      <span style="font:400 12px/1.4 ui-monospace,monospace;color:#8a93a0;white-space:nowrap">6 daughters · 44 s · 3.6 GB</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+        <div onClick="{{ v.pick }}" style="padding:9px 16px;border-radius:999px;cursor:pointer;font:400 12.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap;transition:all .2s ease;border:1px solid {{ v.border }};background:{{ v.bg }};color:{{ v.fg }}">{{ v.label }}</div>
+      </sc-for>
+      <div style="width:1px;background:rgba(11,18,32,.12);margin:0 6px"></div>
+      <div style="padding:9px 18px;border-radius:999px;background:#d6003f;color:#fff;font:500 12.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap">Download JSON</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:stretch">
+    <!-- branch list -->
+    <div style="flex:1 1 260px;min-width:250px;max-width:340px;border-right:1px solid rgba(11,18,32,.09);display:flex;flex-direction:column">
+      <div style="padding:16px 20px 12px;font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">DAUGHTER INSTANCES</div>
+      <sc-for list="{{ branches }}" as="b" hint-placeholder-count="6">
+        <div onClick="{{ b.select }}" style="padding:14px 20px;border-top:1px solid rgba(11,18,32,.07);cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:background .25s ease;background:{{ b.rowBg }}">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="width:9px;height:9px;border-radius:50%;background:{{ b.dot }}"></span>
+              <span style="font:500 13.5px/1.4 ui-monospace,Menlo,monospace;color:#0b1220">{{ b.id }}</span>
+            </div>
+            <span style="display:flex;align-items:center;gap:7px"><span style="font:400 10px/1.4 ui-monospace,monospace;color:{{ b.statusColor }};white-space:nowrap">{{ b.status }}</span><span style="font:400 11.5px/1.4 ui-monospace,monospace;color:#8a93a0;white-space:nowrap">r {{ b.radius }} mm</span></span>
+          </div>
+          <div style="font:400 11.5px/1.4 ui-monospace,monospace;color:#6d7684;padding-left:18px">ostium {{ b.ostium }}</div>
+          <div style="display:flex;gap:6px;padding-left:18px">
+            <span style="font:400 10.5px/1.35 ui-monospace,monospace;color:#d6003f;background:#ffe9ef;padding:4px 7px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ b.tag }}</span>
+            <span style="font:400 10.5px/1.35 ui-monospace,monospace;color:#6d7684;background:#f2f4f8;padding:4px 7px;border-radius:4px;white-space:nowrap;flex:none">conf {{ b.conf }}</span>
+          </div>
+        </div>
+      </sc-for>
+      <div style="padding:16px 20px;border-top:1px solid rgba(11,18,32,.07);display:flex;flex-direction:column;gap:8px">
+        <div style="font:400 12px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">2 rejected: too small, or traceable under 5 mm.</div>
+        <div style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#d6003f">Show rejected →</div>
+      </div>
+    </div>
+
+    <!-- viewer -->
+    <div style="flex:3 1 480px;min-width:460px;background:#06090f;position:relative;min-height:560px;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 46%,rgba(190,90,110,.22),transparent 62%)"></div>
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 44px),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 44px)"></div>
+      <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);transition:all .45s cubic-bezier(.22,.61,.36,1);background:radial-gradient(circle,#ffe6ea 0%,#e69fae 58%,rgba(150,60,80,.25) 72%,transparent 78%);box-shadow:0 0 70px rgba(240,120,150,.35);width:{{ aortaW }};height:{{ aortaH }};border-radius:{{ aortaR }}"></div>
+      <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);transition:all .45s cubic-bezier(.22,.61,.36,1);border:1.5px dashed rgba(255,107,133,.75);width:{{ aortaOutlineW }};height:{{ aortaOutlineH }};border-radius:{{ aortaR }}"></div>
+      <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) translate(-158px,52px);font:400 10.5px/1.4 ui-monospace,monospace;color:#ff6b85;white-space:nowrap">parent aorta · mask</div>
+
+      <sc-for list="{{ markers }}" as="m" hint-placeholder-count="6">
+        <div style="position:absolute;left:{{ m.x }}%;top:{{ m.y }}%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;opacity:{{ m.op }}">
+          <div style="width:{{ m.size }}px;height:{{ m.size }}px;border-radius:50%;transition:all .35s cubic-bezier(.22,.61,.36,1);border:2px solid {{ m.color }};background:{{ m.fill }};box-shadow:0 0 18px {{ m.glow }}"></div>
+          <div style="font:500 10px/1.4 ui-monospace,monospace;color:{{ m.color }};white-space:nowrap">{{ m.label }}</div>
+        </div>
+      </sc-for>
+      <sc-for list="{{ arrows }}" as="a" hint-placeholder-count="6">
+        <div style="position:absolute;left:{{ a.x }}%;top:{{ a.y }}%;width:{{ a.len }}px;height:2px;background:{{ a.color }};transition:width .35s cubic-bezier(.22,.61,.36,1),opacity .35s ease;transform-origin:0 50%;transform:rotate({{ a.rot }}deg);opacity:{{ a.op }}">
+          <div style="position:absolute;right:-1px;top:-3px;width:0;height:0;border-left:8px solid {{ a.color }};border-top:4px solid transparent;border-bottom:4px solid transparent"></div>
+        </div>
+      </sc-for>
+
+      <div style="position:absolute;left:20px;top:18px;right:200px;display:flex;flex-direction:column;gap:5px;font:400 11px/1.5 ui-monospace,monospace;color:#c69ba4;white-space:nowrap">
+        <div style="color:#fff0f3">{{ hud1 }}</div>
+        <div>{{ hud2 }}</div>
+        <div>{{ hud3 }}</div>
+      </div>
+      <div style="position:absolute;right:20px;top:18px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;font:400 10.5px/1.4 ui-monospace,monospace">
+        <div style="display:flex;align-items:center;gap:7px;color:#ff6b85"><span style="width:9px;height:9px;border-radius:50%;border:2px solid #ff6b85"></span>ostium centre</div>
+        <div style="display:flex;align-items:center;gap:7px;color:#ffd3dc"><span style="width:9px;height:9px;border-radius:50%;background:#ffd3dc"></span>daughter seed (5 mm)</div>
+        <div style="display:flex;align-items:center;gap:7px;color:#ecd7dc"><span style="width:16px;height:2px;background:#ecd7dc"></span>direction vector</div>
+      </div>
+      <sc-if value="{{ show3d }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,9,15,.86);backdrop-filter:blur(3px)">
+          <div style="text-align:center;display:flex;flex-direction:column;gap:10px;padding:0 24px">
+            <div style="font:400 12px/1.5 ui-monospace,monospace;color:#dcbfc6">3D VIEW</div>
+            <div style="font:400 14px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff0f3;max-width:340px">Surface render of the aorta with branch seeds. Drop the real volume render here.</div>
+          </div>
+        </div>
+      </sc-if>
+      <div style="position:absolute;left:20px;right:20px;bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <div style="padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff0f3;font:400 11.5px/1.4 ui-monospace,monospace;white-space:nowrap">Overlays on</div>
+        <div style="padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:#dcbfc6;font:400 11.5px/1.4 ui-monospace,monospace;white-space:nowrap">Mask 40%</div>
+        <div style="padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:#dcbfc6;font:400 11.5px/1.4 ui-monospace,monospace;white-space:nowrap">Arrows ×2</div>
+        <div style="margin-left:auto;font:400 10.5px/1.4 ui-monospace,monospace;color:#a8858d;white-space:nowrap">drop the real CTA render here</div>
+      </div>
+    </div>
+
+    <!-- inspector -->
+    <div style="flex:1 1 300px;min-width:290px;box-sizing:border-box;border-left:1px solid rgba(11,18,32,.09);border-top:1px solid rgba(11,18,32,.09);padding:20px 22px;display:flex;flex-direction:column;gap:20px;background:#fafbfd">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font:600 17px/1.4 ui-monospace,Menlo,monospace;color:#0b1220">{{ sel.id }}</span>
+        <span style="font:400 11px/1.4 ui-monospace,monospace;color:#d6003f;background:#ffe9ef;padding:5px 9px;border-radius:5px">parent: aorta</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="border:1px solid rgba(11,18,32,.1);border-radius:10px;padding:12px 14px;background:#fff"><div style="font:400 11px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:7px">RADIUS</div><div style="font:600 20px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">{{ sel.radius }} <span style="font-size:12px;color:#8a93a0">mm</span></div></div>
+        <div style="border:1px solid rgba(11,18,32,.1);border-radius:10px;padding:12px 14px;background:#fff"><div style="font:400 11px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:7px">TRACED</div><div style="font:600 20px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">{{ sel.traced }} <span style="font-size:12px;color:#8a93a0">mm</span></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">PHYSICAL COORDINATES</div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#0b1220"><span style="color:#6d7684;white-space:nowrap">ostium_xyz_mm</span><span style="white-space:nowrap">{{ sel.ostium }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#0b1220"><span style="color:#6d7684;white-space:nowrap">seed_xyz_mm</span><span style="white-space:nowrap">{{ sel.seed }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 12px/1.4 ui-monospace,monospace;color:#0b1220"><span style="color:#6d7684;white-space:nowrap">direction_xyz</span><span style="white-space:nowrap">{{ sel.dir }}</span></div>
+        <div style="font:400 11px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">Physical millimetres, never voxel indices.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">CLOCK-FACE ORIGIN</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:86px;height:86px;border-radius:50%;border:1.5px solid rgba(11,18,32,.18);position:relative;flex:none">
+            <div style="position:absolute;left:50%;top:50%;width:2px;height:38px;background:#d6003f;transition:transform .45s cubic-bezier(.22,.61,.36,1);transform-origin:50% 0;transform:translate(-50%,0) rotate({{ sel.clockRot }}deg)"></div>
+            <div style="position:absolute;left:50%;top:4px;transform:translateX(-50%);font:400 9px/1.4 ui-monospace,monospace;color:#8a93a0">ANT</div>
+            <div style="position:absolute;left:50%;bottom:4px;transform:translateX(-50%);font:400 9px/1.4 ui-monospace,monospace;color:#8a93a0">POST</div>
+          </div>
+          <div style="font:400 12.5px/1.6 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">Origin at <b style="color:#0b1220">{{ sel.clock }}</b> on the aortic wall,<br>{{ sel.level }} below the coverage top.</div>
+        </div>
+      </div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <div onClick="{{ onConfirm }}" style="flex:1;text-align:center;padding:11px;border-radius:999px;cursor:pointer;font:500 12.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;transition:all .2s ease;background:{{ confirmBg }};color:{{ confirmFg }}">Confirm</div>
+          <div onClick="{{ onReject }}" style="flex:1;text-align:center;padding:11px;border-radius:999px;cursor:pointer;border:1px solid rgba(11,18,32,.22);font:500 12.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;transition:all .2s ease;background:{{ rejectBg }};color:{{ rejectFg }}">Reject</div>
+        </div>
+        <div style="text-align:center;font:400 11.5px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">{{ decisionLine }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid rgba(11,18,32,.09);padding:22px 26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);gap:32px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">ORIGIN MAP — all daughters along the supplied aorta</div>
+      <div style="position:relative;height:96px;border:1px solid rgba(11,18,32,.1);border-radius:12px;background:linear-gradient(to bottom,#f7f9fc,#fff);overflow:hidden">
+        <div style="position:absolute;left:4%;right:4%;top:50%;height:26px;transform:translateY(-50%);background:#ffe4ea;border-top:1.5px solid #f3b9c7;border-bottom:1.5px solid #f3b9c7;border-radius:3px"></div>
+        <sc-for list="{{ mapPins }}" as="p" hint-placeholder-count="6">
+          <div style="position:absolute;left:{{ p.x }}%;top:{{ p.top }}%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="width:2px;height:{{ p.stem }}px;background:{{ p.color }}"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:{{ p.color }}"></div>
+            <div style="font:400 9.5px/1.4 ui-monospace,monospace;color:#6d7684;white-space:nowrap">{{ p.label }}</div>
+          </div>
+        </sc-for>
+        </div>
+      <div style="display:flex;justify-content:space-between;font:400 9.5px/1.4 ui-monospace,monospace;color:#8a93a0"><span>superior · z 268 mm</span><span>inferior · z 82 mm</span></div>
+      <div style="font:400 12px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">Greyed ends are cropping, not origins. Two pins at one level stay two branches.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8a93a0">PREDICTION.JSON</span><span style="font:400 11.5px/1.4 ui-monospace,monospace;color:#d6003f">copy</span></div>
+      <div style="background:#0b1220;border-radius:12px;padding:16px 18px;font:400 11px/1.75 ui-monospace,Menlo,monospace;color:#e8d3d8;white-space:pre;overflow:auto;max-height:230px">{{ json }}</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 04 LIBRARY -->
+<section id="cases" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#0b1220;color:#fff;padding:5px 8px;border-radius:5px">04</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Case library & batch export</span>
+<span style="font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#7a8593">GET /api/cases</span>
+</div>
+
+<div style="width:100%;box-sizing:border-box;background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:18px;padding:30px 30px 26px;display:flex;flex-direction:column;gap:24px;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0 0 6px;font:700 34px/1.05 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.03em;color:#0b1220">Development set</h2>
+      <p style="margin:0;font:400 14px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5b6673">25 cases · 24 done · 46 s and 4 branches on average</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="padding:11px 18px;border:1px solid rgba(11,18,32,.2);border-radius:999px;font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220;white-space:nowrap">Run all</div>
+      <div style="padding:11px 18px;border-radius:999px;background:#d6003f;color:#fff;font:500 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;white-space:nowrap">Export predictions (.zip)</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+    <div style="border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:18px 20px"><div style="font:400 11.5px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:10px">DAUGHTERS FOUND</div><div style="font:600 30px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">101</div></div>
+    <div style="border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:18px 20px"><div style="font:400 11.5px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:10px">F1 (dev subset)</div><div style="font:600 30px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#d6003f">0.87</div></div>
+    <div style="border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:18px 20px"><div style="font:400 11.5px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:10px">MEDIAN OSTIUM ERROR</div><div style="font:600 30px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">2.1 <span style="font-size:14px;color:#8a93a0">mm</span></div></div>
+    <div style="border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:18px 20px"><div style="font:400 11.5px/1.4 ui-monospace,monospace;color:#8a93a0;margin-bottom:10px">SLOWEST CASE</div><div style="font:600 30px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">58 <span style="font-size:14px;color:#8a93a0">s</span></div></div>
+  </div>
+
+  <div style="border:1px solid rgba(11,18,32,.1);border-radius:14px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:1.1fr .8fr 1fr .8fr .8fr 1fr .6fr;gap:0;padding:13px 20px;background:#f7f9fc;font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#8a93a0">
+      <span>CASE</span><span>STATUS</span><span>DAUGHTERS</span><span>COVERAGE</span><span>RUNTIME</span><span>OUTPUT</span><span></span>
+    </div>
+    <sc-for list="{{ cases }}" as="c" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:1.1fr .8fr 1fr .8fr .8fr 1fr .6fr;gap:0;padding:15px 20px;border-top:1px solid rgba(11,18,32,.07);align-items:center;font:400 13px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">
+        <span style="font-family:ui-monospace,monospace;font-size:12.5px">{{ c.id }}</span>
+        <span style="font-size:12px;color:{{ c.statusColor }}">{{ c.status }}</span>
+        <span style="display:flex;align-items:center;gap:7px"><span style="font-weight:500">{{ c.n }}</span><span style="height:6px;width:{{ c.bar }}px;background:#d6003f;border-radius:3px;display:inline-block"></span></span>
+        <span style="font-family:ui-monospace,monospace;font-size:12px;color:#5b6673">{{ c.coverage }}</span>
+        <span style="font-family:ui-monospace,monospace;font-size:12px;color:#5b6673">{{ c.runtime }}</span>
+        <span style="font-family:ui-monospace,monospace;font-size:12px;color:#5b6673">{{ c.output }}</span>
+        <span style="text-align:right;color:#d6003f;font-size:12.5px">Review →</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</section>
+
+<!-- ELEMENTS CHECKLIST -->
+<section id="method" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#d6003f;color:#fff;padding:5px 8px;border-radius:5px">SPEC</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Elements the frontend must contain</span>
+</div>
+<div style="position:relative;width:100%">
+<div style="position:absolute;left:4%;top:-40px;right:4%;height:420px;pointer-events:none;overflow:hidden">
+<div style="position:absolute;left:0;right:60px;top:170px;height:90px;border-radius:999px;background:#d6003f;filter:blur(58px);opacity:.3"></div>
+<div style="position:absolute;left:240px;top:40px;width:420px;height:44px;border-radius:999px;background:#ef2d5e;filter:blur(46px);opacity:.26;transform:rotate(-26deg)"></div>
+<div style="position:absolute;right:60px;top:200px;width:380px;height:40px;border-radius:999px;background:#ff7d97;filter:blur(44px);opacity:.26;transform:rotate(22deg)"></div>
+</div>
+<div style="position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+  <div style="background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#d6003f">MANDATORY — FROM THE BRIEF</div>
+    <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">
+      <li>Upload CT + aorta mask, no manual clicks</li>
+      <li>A branch list that varies in length</li>
+      <li>Unique ID per branch, parent = aorta</li>
+      <li>Ostium, seed, radius and direction in millimetres</li>
+      <li>Visual check: mask, ostia, arrows — 3 cases minimum</li>
+      <li>An empty state when nothing is found</li>
+      <li>Raw JSON, viewable and downloadable</li>
+      <li>Runtime and peak memory per case</li>
+    </ul>
+  </div>
+  <div style="background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#d6003f">BACKEND CONTRACT</div>
+    <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">
+      <li>POST /api/cases — image + mask, returns case_id</li>
+      <li>POST /api/cases/:id/run — settings, returns run_id</li>
+      <li>GET /api/runs/:id/events — live stages and logs</li>
+      <li>GET /api/cases/:id/prediction — the JSON above</li>
+      <li>GET /api/cases/:id/slice?z= — a slice image</li>
+      <li>GET /api/cases/:id/overlay — ostia and arrows</li>
+      <li>GET /api/cases — the case list</li>
+      <li>GET /api/cases/:id/export — all predictions, zipped</li>
+    </ul>
+  </div>
+  <div style="background:#0b1220;border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;color:#fff">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#ff6b85">WHAT WINS EXTRA POINTS</div>
+    <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fbe2e8">
+      <li>Origin map: every ostium along the aorta at a glance</li>
+      <li>Clock face for where each branch leaves the wall</li>
+      <li>A drawer showing what was rejected, and why</li>
+      <li>Flags for the tricky cases: cropped ends, trunks, second-order vessels</li>
+      <li>A review log kept apart from detection</li>
+      <li>Batch metrics as proof it reproduces</li>
+    </ul>
+  </div>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font:600 10px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;background:#d6003f;color:#fff;padding:5px 8px;border-radius:5px">ENV</span>
+<span style="font:600 14px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">Runs offline, saves locally</span>
+</div>
+<div style="width:100%;box-sizing:border-box;background:#fff;border:1px solid rgba(11,18,32,.1);border-radius:18px;padding:26px 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:26px">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#d6003f">ORGANISER ENVIRONMENT</div>
+    <p style="margin:0;font:400 13.5px/1.6 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">The organisers will use a hidden test set and a standard environment with four CPU cores, 8 GB RAM, no GPU and no internet access. The initial runtime target is an average of no more than 60 seconds per case; the final limit will be confirmed after the organiser baseline is tested.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#d6003f">WHAT THAT MEANS HERE</div>
+    <ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0b1220">
+      <li>No network calls, no CDN fonts, no remote assets</li>
+      <li>Files and settings stay in the browser: IndexedDB for volumes, localStorage for settings</li>
+      <li>Every run reports time and peak memory against 60 s and 8 GB</li>
+      <li>Detection still runs in the local Python worker, not the browser</li>
+    </ul>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#d6003f">SAVED ON THIS DEVICE</div>
+    <div style="font:400 12.5px/1.7 ui-monospace,monospace;color:#5b6673">{{ storageLine }}</div>
+    <div style="font:400 12px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8a93a0">Reload the page and it all comes back. Nothing leaves the machine.</div>
+  </div>
+</div>
+</section>
+
+<footer style="position:relative;width:100%;box-sizing:border-box;border-radius:22px;padding:44px 40px;overflow:hidden;background:linear-gradient(135deg,rgba(132,0,38,.82),rgba(214,0,63,.62));backdrop-filter:blur(26px) saturate(140%);-webkit-backdrop-filter:blur(26px) saturate(140%);border:1px solid rgba(255,255,255,.28);box-shadow:0 18px 50px rgba(214,0,63,.28),inset 0 1px 0 rgba(255,255,255,.35);color:#fff">
+  <div style="position:absolute;left:-40px;bottom:-120px;width:70%;height:260px;pointer-events:none">
+    <div style="position:absolute;left:0;top:80px;right:40px;height:80px;border-radius:999px;background:#ff9fb1;filter:blur(50px);opacity:.4"></div>
+    <div style="position:absolute;left:180px;top:10px;width:320px;height:40px;border-radius:999px;background:#ffc9d4;filter:blur(42px);opacity:.34;transform:rotate(-24deg)"></div>
+  </div>
+  <div style="position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:36px">
+  <div style="display:flex;flex-direction:column;gap:16px;min-width:240px">
+    <img src="assets/whenyah-white.png" alt="When Yah?" style="width:184px;height:auto;display:block">
+    <div style="font:400 15px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#ffdbe3">by <span style="color:#fff;font-weight:500">When Yah? Team</span></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:11px;min-width:170px">
+      <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#ffb9c7">CONTACT US</div>
+      <a href="mailto:team@whenyah.dev" style="font:400 15px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;white-space:nowrap">team@whenyah.dev</a>
+      <span style="font:400 13px/1.5 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#ffdbe3">Method, data, or a walkthrough.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;min-width:170px">
+      <div style="font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#ffb9c7">SUPPORT</div>
+      <a href="#" style="font:400 15px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff">Setup &amp; run guide</a>
+      <a href="#" style="font:400 15px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff">Report a failing case</a>
+      <a href="#" style="font:400 15px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff">Output format reference</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;align-self:flex-end">
+      <div style="padding:15px 26px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.16);border-radius:999px;font:400 15px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;white-space:nowrap">Let's talk</div>
+      <div style="width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font:400 18px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff">↗</div>
+    </div>
+  </div>
+  </div>
+</footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:1000}}">
+const DATA = [
+  {id:"branch_001", radius:"3.4", ostium:"[12.4, -31.8, 184.6]", seed:"[15.1, -29.7, 181.2]", dir:"[0.56, 0.43, -0.71]", traced:"10.0", conf:"0.94", tag:"anterior", clock:"12 o'clock", clockRot:0, level:"18 mm", x:50, y:31, ax:52, ay:33, rot:-72},
+  {id:"branch_002", radius:"2.7", ostium:"[8.9, -28.4, 171.2]", seed:"[4.6, -27.1, 168.9]", dir:"[-0.72, 0.19, -0.66]", traced:"7.8", conf:"0.91", tag:"left lateral", clock:"3 o'clock", clockRot:96, level:"31 mm", x:41, y:44, ax:40, ay:45, rot:186},
+  {id:"branch_003", radius:"2.9", ostium:"[16.2, -30.1, 169.8]", seed:"[20.8, -28.9, 167.4]", dir:"[0.81, 0.12, -0.57]", traced:"6.4", conf:"0.88", tag:"trunk · splits at 6.4", clock:"9 o'clock", clockRot:264, level:"33 mm", x:59, y:47, ax:60, ay:48, rot:-16},
+  {id:"branch_004", radius:"1.9", ostium:"[13.7, -34.6, 158.3]", seed:"[16.9, -37.2, 155.1]", dir:"[0.61, -0.48, -0.63]", traced:"9.2", conf:"0.79", tag:"posterolateral", clock:"8 o'clock", clockRot:228, level:"44 mm", x:58, y:58, ax:58, ay:58, rot:34},
+  {id:"branch_005", radius:"1.6", ostium:"[6.4, -33.9, 156.9]", seed:"[2.1, -35.8, 154.2]", dir:"[-0.74, -0.31, -0.60]", traced:"5.6", conf:"0.72", tag:"paired with 004", clock:"4 o'clock", clockRot:132, level:"46 mm", x:42, y:59, ax:42, ay:59, rot:146},
+  {id:"branch_006", radius:"2.2", ostium:"[11.8, -36.2, 142.7]", seed:"[12.4, -40.6, 139.8]", dir:"[0.11, -0.79, -0.60]", traced:"10.0", conf:"0.85", tag:"posterior", clock:"6 o'clock", clockRot:180, level:"58 mm", x:50, y:66, ax:50, ay:67, rot:78}
+];
+
+const KEY = "branchseed.console.v1";
+const DEFAULTS = {
+  minLen: 5, traceCap: 10, minRadius: 1.2,
+  excludeEnds: true, splitNearby: true, iliac: false,
+  ct: null, mask: null, decisions: {}, savedAt: null
+};
+
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("branchseed", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("files");
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function putFile(key, file) {
+  const db = await idb();
+  await new Promise((res, rej) => {
+    const tx = db.transaction("files", "readwrite");
+    tx.objectStore("files").put(file, key);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+async function delFiles() {
+  const db = await idb();
+  await new Promise((res) => {
+    const tx = db.transaction("files", "readwrite");
+    tx.objectStore("files").clear();
+    tx.oncomplete = res;
+  });
+}
+const fmtSize = (b) => b > 1e9 ? (b / 1e9).toFixed(1) + " GB" : b > 1e6 ? (b / 1e6).toFixed(0) + " MB" : (b / 1e3).toFixed(0) + " KB";
+
+class Component extends DCLogic {
+  state = { sel: 0, view: "mpr", saved: { ...DEFAULTS } };
+
+  load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) this.setState({ saved: { ...DEFAULTS, ...JSON.parse(raw) } });
+    } catch (e) {}
+  }
+  save(patch) {
+    const next = { ...this.state.saved, ...patch, savedAt: Date.now() };
+    this.setState({ saved: next });
+    try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (e) {}
+  }
+  async pick(kind, e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    try { await putFile(kind, f); } catch (err) {}
+    this.save({ [kind]: { name: f.name, size: f.size, at: Date.now() } });
+  }
+
+  componentDidMount() {
+    this.load();
+    const root = document;
+    const blocks = Array.from(root.querySelectorAll("header, section, footer"));
+    blocks.forEach((el, i) => {
+      if (el.dataset.revealed) return;
+      el.style.opacity = "0";
+      el.style.transform = "translateY(26px)";
+      el.style.transition = "opacity .7s cubic-bezier(.22,.61,.36,1) " + Math.min(i * 60, 240) + "ms, transform .7s cubic-bezier(.22,.61,.36,1) " + Math.min(i * 60, 240) + "ms";
+      el.style.willChange = "opacity, transform";
+    });
+    const show = (el) => {
+      el.style.opacity = "1";
+      el.style.transform = "none";
+      if (!el.dataset.revealed) {
+        el.dataset.revealed = "1";
+        if (this._io) this._io.unobserve(el);
+      }
+    };
+    const sweep = () => blocks.forEach((el) => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) show(el);
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) show(e.target); });
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.05 });
+    blocks.forEach((el) => { if (!el.dataset.revealed) io.observe(el); else show(el); });
+    this._io = io;
+    this._sweep = sweep;
+    window.addEventListener("scroll", sweep, { passive: true });
+    window.addEventListener("resize", sweep);
+    window.addEventListener("beforeprint", () => blocks.forEach(show));
+    requestAnimationFrame(sweep);
+    this._failsafe = setTimeout(() => blocks.forEach(show), 4000);
+  }
+
+  componentWillUnmount() {
+    if (this._io) this._io.disconnect();
+    if (this._failsafe) clearTimeout(this._failsafe);
+    if (this._sweep) {
+      window.removeEventListener("scroll", this._sweep);
+      window.removeEventListener("resize", this._sweep);
+    }
+  }
+  renderVals() {
+    const S = this.state.saved;
+    const sel = DATA[this.state.sel];
+    const dec = S.decisions || {};
+    const statusText = { confirmed: "confirmed", rejected: "rejected" };
+    const branches = DATA.map((b, i) => ({
+      ...b,
+      select: () => this.setState({ sel: i }),
+      rowBg: i === this.state.sel ? "#fff2f5" : "#fff",
+      dot: i === this.state.sel ? "#d6003f" : "#b6c0ce",
+      status: statusText[dec[b.id]] || "",
+      statusColor: dec[b.id] === "confirmed" ? "#1f8a4c" : "#a8737f"
+    }));
+    const nDec = Object.keys(dec).length;
+    const savedWhen = S.savedAt ? new Date(S.savedAt).toLocaleTimeString() : null;
+    const toggles = [
+      { key: "excludeEnds", label: "Exclude cropped end faces" },
+      { key: "splitNearby", label: "Split nearby origins" },
+      { key: "iliac", label: "Include iliac bifurcation (optional extension)" }
+    ].map((t) => ({
+      label: t.label,
+      toggle: () => this.save({ [t.key]: !S[t.key] }),
+      track: S[t.key] ? "#d6003f" : "#d8cdd0",
+      knob: S[t.key] ? "12px" : "2px",
+      color: S[t.key] ? "#0b1220" : "#8a7a80"
+    }));
+    const ready = !!(S.ct && S.mask);
+    const local = {
+      toggles,
+      minLen: Number(S.minLen).toFixed(1),
+      traceCap: Number(S.traceCap).toFixed(1),
+      minRadius: Number(S.minRadius).toFixed(1),
+      onMinLen: (e) => this.save({ minLen: parseFloat(e.target.value) }),
+      onTraceCap: (e) => this.save({ traceCap: parseFloat(e.target.value) }),
+      onMinRadius: (e) => this.save({ minRadius: parseFloat(e.target.value) }),
+      onCt: (e) => this.pick("ct", e),
+      onMask: (e) => this.pick("mask", e),
+      ctName: S.ct ? S.ct.name : "Choose a CT volume (.nii / .nii.gz)",
+      ctMeta: S.ct ? fmtSize(S.ct.size) + " · stored locally" : "nothing selected",
+      ctState: S.ct ? "SAVED" : "EMPTY",
+      ctColor: S.ct ? "#d6003f" : "#a9b0ba",
+      maskName: S.mask ? S.mask.name : "Choose the aorta mask",
+      maskMeta: S.mask ? fmtSize(S.mask.size) + " · stored locally" : "nothing selected",
+      maskState: S.mask ? "SAVED" : "EMPTY",
+      maskColor: S.mask ? "#d6003f" : "#a9b0ba",
+      runLabel: ready ? "Run detection" : "Add both files",
+      runHint: ready ? "About 48 s · 4 CPU cores, no GPU, no network" : "The worker needs a CT and an aorta mask.",
+      onRun: () => this.save({ lastRunAt: Date.now() }),
+      onClear: async () => {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        await delFiles().catch(() => {});
+        this.setState({ saved: { ...DEFAULTS } });
+      },
+      savedLine: savedWhen ? "Saved on this device · " + savedWhen : "Nothing saved yet",
+      storageLine: (S.ct ? S.ct.name + " · " + fmtSize(S.ct.size) : "no CT") + " / " + (S.mask ? S.mask.name + " · " + fmtSize(S.mask.size) : "no mask") + " · " + nDec + " review calls",
+      onConfirm: () => this.save({ decisions: { ...dec, [sel.id]: "confirmed" } }),
+      onReject: () => this.save({ decisions: { ...dec, [sel.id]: "rejected" } }),
+      confirmBg: dec[sel.id] === "confirmed" ? "#1f8a4c" : "#0b1220",
+      confirmFg: "#fff",
+      rejectBg: dec[sel.id] === "rejected" ? "#d6003f" : "transparent",
+      rejectFg: dec[sel.id] === "rejected" ? "#fff" : "#0b1220",
+      decisionLine: nDec ? nDec + " of 6 reviewed · saved on this device" : "Your calls are logged. They never change the detector."
+    };
+    const markers = DATA.map((b, i) => ({
+      x: b.x, y: b.y, label: b.id.replace("branch_", "b"),
+      size: i === this.state.sel ? 18 : 12,
+      color: i === this.state.sel ? "#ffd3dc" : "#ff6b85",
+      fill: i === this.state.sel ? "rgba(255,211,220,.28)" : "transparent",
+      glow: i === this.state.sel ? "rgba(255,211,220,.55)" : "rgba(255,107,133,.25)",
+      op: i === this.state.sel ? 1 : 0.72
+    }));
+    const arrows = DATA.map((b, i) => ({
+      x: b.ax, y: b.ay, rot: b.rot, len: i === this.state.sel ? 76 : 52,
+      color: i === this.state.sel ? "#ffd3dc" : "rgba(207,217,234,.75)",
+      op: i === this.state.sel ? 1 : 0.6
+    }));
+    const mapPins = DATA.map((b, i) => ({
+      x: 14 + i * 11.5,
+      top: i % 2 ? 68 : 30,
+      stem: 16,
+      label: b.id.replace("branch_", "b"),
+      color: i === this.state.sel ? "#d6003f" : "#c99aa6"
+    }));
+    const cases = [
+      {id:"subject001", status:"complete", statusColor:"#d6003f", n:6, bar:48, coverage:"186 mm", runtime:"44 s", output:"prediction.json"},
+      {id:"subject002", status:"complete", statusColor:"#d6003f", n:4, bar:32, coverage:"142 mm", runtime:"39 s", output:"prediction.json"},
+      {id:"subject003", status:"complete", statusColor:"#d6003f", n:3, bar:24, coverage:"118 mm", runtime:"36 s", output:"prediction.json"},
+      {id:"subject004", status:"complete", statusColor:"#d6003f", n:0, bar:4, coverage:"61 mm", runtime:"22 s", output:"empty daughters []"},
+      {id:"subject014", status:"running", statusColor:"#c47a00", n:"—", bar:0, coverage:"186 mm", runtime:"31 s", output:"—"},
+      {id:"subject015", status:"queued", statusColor:"#8a93a0", n:"—", bar:0, coverage:"—", runtime:"—", output:"—"}
+    ];
+    const json = `{
+  "case_id": "subject001",
+  "parent": { "instance_id": "aorta" },
+  "daughters": [
+    {
+      "instance_id": "${sel.id}",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": ${sel.ostium},
+      "seed_xyz_mm": ${sel.seed},
+      "radius_mm": ${sel.radius},
+      "direction_xyz": ${sel.dir}
+    }
+    /* …5 more daughters */
+  ]
+}`;
+    const view = this.state.view;
+    const views = [
+      { key: "axial", label: "Axial" },
+      { key: "mpr", label: "Curved MPR" },
+      { key: "3d", label: "3D" }
+    ].map((v) => ({
+      label: v.label,
+      pick: () => this.setState({ view: v.key }),
+      bg: view === v.key ? "#0b1220" : "transparent",
+      fg: view === v.key ? "#fff" : "#0b1220",
+      border: view === v.key ? "#0b1220" : "rgba(11,18,32,.2)"
+    }));
+    const shape = {
+      axial: { w: "168px", h: "168px", r: "50%", ow: "172px", oh: "172px" },
+      mpr: { w: "150px", h: "150px", r: "50%", ow: "154px", oh: "154px" },
+      "3d": { w: "120px", h: "320px", r: "60px", ow: "124px", oh: "324px" }
+    }[view];
+    const hud = {
+      axial: ["AXIAL SLICE — abdomen", "WW 600 / WL 150", "slice 214 / 431 · z = 184.6 mm"],
+      mpr: ["CURVED MPR — aorta centreline", "WW 600 / WL 150", "186 mm of aorta · 6 daughters"],
+      "3d": ["3D — surface render", "opacity 70% · shadows on", "orbit to inspect each ostium"]
+    }[view];
+
+    return { branches, markers, arrows, mapPins, cases, sel, json, ...local,
+      views, show3d: view === "3d",
+      aortaW: shape.w, aortaH: shape.h, aortaR: shape.r,
+      aortaOutlineW: shape.ow, aortaOutlineH: shape.oh,
+      hud1: hud[0], hud2: hud[1], hud3: hud[2] };
+  }
+}
+</script>
+</body>
+</html>
