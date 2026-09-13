@@ -110,7 +110,7 @@ def validate_schema(prediction: dict) -> list:
     return errors
 
 
-def _run_one_case(case_id: str, image_path: str, mask_path: str, cfg: dict) -> tuple:
+def _run_one_case(case_id: str, image_path: str, mask_path: str, cfg: dict, on_stage=None) -> tuple:
     """Run one case with wall-clock timing and peak-memory tracking.
 
     Args:
@@ -119,6 +119,9 @@ def _run_one_case(case_id: str, image_path: str, mask_path: str, cfg: dict) -> t
         image_path: path to the CT volume.
         mask_path: path to the binary aorta mask.
         cfg: parsed config dict.
+        on_stage: optional callable(str) passed straight through to
+            `run_case` for a live progress UI (see run.py:run_case). None
+            by default; unused by the CLI batch runner itself.
 
     Returns:
         (prediction: dict, peak_memory_mb: float, schema_errors: list of
@@ -131,7 +134,7 @@ def _run_one_case(case_id: str, image_path: str, mask_path: str, cfg: dict) -> t
     """
     tracemalloc.start()
     try:
-        prediction = run_case(image_path, mask_path, cfg)
+        prediction = run_case(image_path, mask_path, cfg, on_stage=on_stage)
     except Exception as exc:  # noqa: BLE001 - one case must never stop the batch
         prediction = {
             "case_id": case_id,

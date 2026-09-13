@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Branchseed Console</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-dot"></span>Branchseed</div>
+  <nav class="topnav">
+    <a href="#upload" data-view="upload">New case</a>
+    <a href="#run" data-view="run">Run</a>
+    <a href="#review" data-view="review">Review</a>
+    <a href="#cases" data-view="cases">Cases</a>
+  </nav>
+</header>
+
+<main id="app">
+
+  <!-- 01 UPLOAD -->
+  <section id="view-upload" class="view">
+    <div class="eyebrow-row"><span class="eyebrow">01</span><span class="eyebrow-title">New case &mdash; upload &amp; configure</span></div>
+    <div class="card split">
+      <div class="card-main">
+        <h2>Submit a case</h2>
+        <p class="muted">Drop in the CT volume and the parent aorta mask. No manual point placement.</p>
+
+        <div class="dropzone-row">
+          <label class="dropzone">
+            <input type="file" id="file-image" accept=".nii,.nii.gz,.gz">
+            <div class="dz-head"><span>CT volume</span><span id="image-state" class="dz-state">not selected</span></div>
+            <div class="dz-body"><span id="image-name">drop or click to choose</span></div>
+          </label>
+          <label class="dropzone accent">
+            <input type="file" id="file-mask" accept=".nii,.nii.gz,.gz">
+            <div class="dz-head"><span>Parent aorta mask</span><span id="mask-state" class="dz-state">not selected</span></div>
+            <div class="dz-body"><span id="mask-name">binary &middot; 1 = aorta</span></div>
+          </label>
+        </div>
+
+        <div class="params">
+          <div class="params-label">DETECTION PARAMETERS</div>
+          <div class="params-grid">
+            <div class="param">
+              <span class="param-name">Min. traceable length</span>
+              <span class="param-value"><span id="val-min-extent">&mdash;</span> mm</span>
+              <input type="range" id="slider-min-extent" min="2" max="12" step="0.5">
+            </div>
+            <div class="param">
+              <span class="param-name">Proximal trace cap</span>
+              <span class="param-value"><span id="val-trace-cap">&mdash;</span> mm</span>
+              <input type="range" id="slider-trace-cap" min="5" max="25" step="0.5">
+            </div>
+            <div class="param">
+              <span class="param-name">Min. ostium radius</span>
+              <span class="param-value"><span id="val-min-radius">&mdash;</span> mm</span>
+              <input type="range" id="slider-min-radius" min="0.5" max="4" step="0.1">
+            </div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-log-rejections"> Explain rejected candidates</label>
+        </div>
+
+        <div class="run-row">
+          <button id="btn-run" class="btn-primary" disabled>Upload &amp; run</button>
+          <span id="run-hint" class="muted">Choose a CT volume and a mask to continue.</span>
+        </div>
+      </div>
+      <div class="card-side">
+        <div class="params-label">CLI EQUIVALENT</div>
+        <pre class="code-block">python run.py \
+  --image image.nii.gz \
+  --aorta-mask aorta_mask.nii.gz \
+  --output prediction.json</pre>
+        <p class="muted small">Same arguments, same result from a terminal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 RUN -->
+  <section id="view-run" class="view">
+    <div class="eyebrow-row"><span class="eyebrow">02</span><span class="eyebrow-title">Run monitor</span></div>
+    <div class="card dark">
+      <div class="run-head">
+        <h2 id="run-case-id">&mdash;</h2>
+        <span class="muted-dark" id="run-id-label"></span>
+      </div>
+      <div class="stage-row" id="stage-row"></div>
+      <div class="log-panel" id="log-panel"></div>
+      <div class="budget-row">
+        <div class="budget">
+          <div class="budget-label"><span>Runtime</span><span id="budget-runtime">0.0 s / 60 s target</span></div>
+          <div class="budget-bar"><div id="budget-runtime-fill" class="budget-fill"></div></div>
+        </div>
+        <div class="budget">
+          <div class="budget-label"><span>Peak memory</span><span id="budget-memory">measuring&hellip;</span></div>
+          <div class="budget-bar"><div id="budget-memory-fill" class="budget-fill"></div></div>
+        </div>
+      </div>
+      <div class="run-actions">
+        <button id="btn-view-results" class="btn-pill-outline-dark" disabled>View results</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 REVIEW -->
+  <section id="view-review" class="view">
+    <div class="eyebrow-row"><span class="eyebrow">03</span><span class="eyebrow-title">Review &mdash; the visual check</span></div>
+    <div class="card">
+      <div class="review-head">
+        <div><span id="review-case-id" class="review-title">&mdash;</span> <span id="review-summary" class="muted"></span></div>
+        <div class="review-actions">
+          <a id="btn-export" class="btn-pill-outline" href="#">Export .zip</a>
+        </div>
+      </div>
+      <div class="review-body">
+        <div class="branch-list" id="branch-list">
+          <div class="params-label">DAUGHTER INSTANCES</div>
+          <div id="branch-rows"></div>
+          <div id="empty-state" class="empty-state" style="display:none">
+            <p><strong>No eligible daughters detected for this case.</strong></p>
+            <p class="muted small">This can be a genuinely branch-free segment, or a case worth a closer look &mdash; check the rejected-candidates drawer below.</p>
+          </div>
+          <button id="btn-toggle-rejected" class="link-btn">Show rejected &rarr;</button>
+          <div id="rejected-drawer" class="rejected-drawer" style="display:none"></div>
+        </div>
+        <div class="viewer">
+          <img id="overlay-img" class="viewer-img" alt="Coronal/sagittal MIP with ostia and direction arrows">
+          <div class="slice-row">
+            <span class="muted small">Axial slice</span>
+            <input type="range" id="slice-slider" min="0" max="0" value="0">
+            <span class="muted small" id="slice-label">&mdash;</span>
+          </div>
+          <img id="slice-img" class="viewer-img" alt="Axial slice">
+        </div>
+        <div class="inspector" id="inspector">
+          <div class="inspector-empty muted small">Select a branch to inspect it.</div>
+        </div>
+      </div>
+      <div class="review-foot">
+        <div class="origin-map-col">
+          <div class="params-label">ORIGIN MAP</div>
+          <img id="origin-map-img" class="origin-map-img" alt="Unrolled arclength/clock-position map of every ostium">
+        </div>
+        <div class="json-col">
+          <div class="json-head"><span class="params-label">PREDICTION.JSON</span><button id="btn-copy-json" class="link-btn">copy</button></div>
+          <pre class="code-block json-block" id="json-block"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 LIBRARY -->
+  <section id="view-cases" class="view">
+    <div class="eyebrow-row"><span class="eyebrow">04</span><span class="eyebrow-title">Case library</span></div>
+    <div class="card">
+      <div class="table-head-row">
+        <span>CASE</span><span>STATUS</span><span>DAUGHTERS</span><span>RUNTIME</span><span>PEAK MEM</span><span></span>
+      </div>
+      <div id="cases-rows"></div>
+    </div>
+  </section>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>

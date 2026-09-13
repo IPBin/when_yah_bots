@@ -113,13 +113,34 @@ def empty_result(case_id: str, warnings: list) -> dict:
     }
 
 
-def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
+def _notify(on_stage, name: str) -> None:
+    """Call `on_stage(name)` if set, never letting it raise into the caller.
+
+    Args:
+        on_stage: optional callable taking one str stage-name argument, or
+            None.
+        name: the stage name to report.
+    """
+    if on_stage is None:
+        return
+    try:
+        on_stage(name)
+    except Exception:  # noqa: BLE001 - a progress callback must never fail a run
+        pass
+
+
+def run_case(image_path: str, mask_path: str, cfg: dict, on_stage=None) -> dict:
     """Run the full pipeline (stages 1-9) on one case.
 
     Args:
         image_path: path to the CT volume.
         mask_path: path to the binary aorta mask.
         cfg: parsed config dict.
+        on_stage: optional callable(str) invoked with a stage name
+            ("load", "profile", "candidates", "frame", "instances",
+            "geometry", "export") immediately before that stage runs.
+            Purely additive/optional; used by webapp/jobs.py to drive a
+            live progress UI. Any exception it raises is swallowed.
 
     Returns:
         dict matching the required prediction schema (§5.10). Never raises;
@@ -131,14 +152,20 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
     warnings = []
     case_id = os.path.basename(os.path.dirname(image_path)) or image_path.split("/")[-1].split(".")[0]
     try:
+        _notify(on_stage, "load")
         case = load_case(image_path, mask_path, cfg)
         case_id = case.case_id
 
+        _notify(on_stage, "profile")
         profile = profile_aorta(case, cfg)
+        _notify(on_stage, "candidates")
         cand = candidate_mask(case, profile, cfg)
+        _notify(on_stage, "frame")
         frame = build_frame(case, cfg)
+        _notify(on_stage, "instances")
         raw_branches = find_raw_branches(case, cand, frame, profile, cfg)
 
+        _notify(on_stage, "geometry")
         accepted = []
         for raw in raw_branches:
             # A single degenerate candidate (e.g. too few voxels for the
@@ -159,6 +186,7 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
 
         accepted = dedup(accepted, cfg)
 
+        _notify(on_stage, "export")
         daughters = []
         for i, (raw, geom) in enumerate(accepted):
             clock_hours, arclen_mm = clock_and_arclen(frame, geom.ostium_mm)
