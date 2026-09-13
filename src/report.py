@@ -179,8 +179,8 @@ def unrolled_map(case: Case, frame: AortaFrame, daughters: list, excluded: list,
 
     fig, ax = plt.subplots(figsize=(11, 6))
 
-    ax.axhspan(0.0, 2.0, color="#fde8d8", zorder=0)
-    ax.axhspan(10.0, 12.0, color="#fde8d8", zorder=0)
+    ax.axhspan(-0.6, 2.0, color="#fde8d8", zorder=0)
+    ax.axhspan(10.0, 12.6, color="#fde8d8", zorder=0)
     ax.axhspan(2.0, 4.0, color="#e6f0fa", zorder=0)
     ax.axhspan(8.0, 10.0, color="#e6f0fa", zorder=0)
     ax.axhspan(4.0, 8.0, color="#eaeaea", zorder=0)
@@ -199,10 +199,18 @@ def unrolled_map(case: Case, frame: AortaFrame, daughters: list, excluded: list,
         takeoff_str = f"{takeoff:.0f}°" if takeoff is not None else "n/a"
         labels.append(f"{d['instance_id']} · r={radius_mm:.1f} mm · {arclen:.1f} mm · {clock % 12.0:.1f}h · {takeoff_str}")
 
+    branch_handle = None
     if xs:
-        ax.scatter(xs, ys, s=sizes, facecolors="tab:red", edgecolors="black", zorder=3)
+        branch_handle = ax.scatter(
+            xs, ys, s=sizes, facecolors="tab:red", edgecolors="black", linewidths=1.0, zorder=3,
+            label="detected branch",
+        )
         for x, y, label in zip(xs, ys, labels):
-            ax.annotate(label, (x, y), textcoords="offset points", xytext=(6, 6), fontsize=8)
+            # keep annotations for near-the-top points below the marker so they
+            # never collide with the title; everything else goes above-right.
+            xytext = (6, -12) if y < 0.6 else (6, 6)
+            va = "top" if y < 0.6 else "bottom"
+            ax.annotate(label, (x, y), textcoords="offset points", xytext=xytext, fontsize=8, va=va)
 
     ex_xs, ex_ys, ex_labels = [], [], []
     for e in excluded:
@@ -210,20 +218,32 @@ def unrolled_map(case: Case, frame: AortaFrame, daughters: list, excluded: list,
         ex_xs.append(arclen)
         ex_ys.append(clock % 12.0)
         ex_labels.append(e.get("reason", "excluded"))
+    excluded_handle = None
     if ex_xs:
-        ax.scatter(ex_xs, ex_ys, s=60, facecolors="none", edgecolors="grey", zorder=2)
+        excluded_handle = ax.scatter(
+            ex_xs, ex_ys, s=60, facecolors="none", edgecolors="grey", zorder=2,
+            label="excluded candidate",
+        )
         for x, y, label in zip(ex_xs, ex_ys, ex_labels):
-            ax.annotate(label, (x, y), textcoords="offset points", xytext=(6, -10), fontsize=7, color="grey")
+            xytext = (6, -12) if y < 0.6 else (6, -10)
+            ax.annotate(label, (x, y), textcoords="offset points", xytext=xytext, fontsize=7, color="grey")
 
-    ax.set_ylim(12.0, 0.0)
+    # Small margin above 12 and below 0 keeps per-marker annotations clear of
+    # the title and the axis frame; the shaded bands still line up with the
+    # true 0-12 clock range since axhspan below is drawn in data coordinates.
+    ax.set_ylim(12.6, -0.6)
     ax.set_yticks([0.0, 3.0, 6.0, 9.0, 12.0])
     ax.set_yticklabels(["12", "3", "6", "9", "12"])
     ax.set_ylabel("clock position (12 = anterior)")
     ax.set_xlabel("arc length from superior end (mm)")
-    ax.set_title("Unrolled aortic map")
+    fig.suptitle("Unrolled aortic map", y=0.99, fontsize=13)
     ax.margins(x=0.08)
 
-    for y, label in ((1.0, "anterior"), (3.0, "lateral"), (6.0, "posterior"), (9.0, "lateral")):
+    # "anterior" wraps around both ends of the clock axis (0h and 12h are the
+    # same position), so label both halves of that band, not just one.
+    for y, label in (
+        (1.0, "anterior"), (3.0, "lateral"), (6.0, "posterior"), (9.0, "lateral"), (11.0, "anterior"),
+    ):
         ax.text(
             -0.06,
             y,
@@ -235,7 +255,17 @@ def unrolled_map(case: Case, frame: AortaFrame, daughters: list, excluded: list,
             transform=ax.get_yaxis_transform(),
         )
 
-    fig.tight_layout()
+    handles = [h for h in (branch_handle, excluded_handle) if h is not None]
+    if handles:
+        # Anchored above the axes (not "upper right" inside the plot) so the
+        # legend box never overlaps a marker or its annotation, wherever they
+        # land on the map.
+        ax.legend(
+            handles=handles, loc="lower center", bbox_to_anchor=(0.5, 1.02),
+            ncol=len(handles), fontsize=8, framealpha=0.9, borderaxespad=0.0,
+        )
+
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.90))
     fig.savefig(output_path, dpi=120)
     plt.close(fig)
 
