@@ -123,6 +123,12 @@ def load_case(image_path: str, mask_path: str, cfg: dict) -> Case:
     """
     case_id = _basename_no_ext(image_path)
 
+    # Some NIfTI files carry a direction cosine matrix that's not perfectly
+    # orthonormal (floating-point error from whatever tool produced them);
+    # ITK's default tolerance rejects those with a RuntimeError, so relax it
+    # before any sitk.ReadImage call.
+    sitk.ProcessObject.SetGlobalDefaultDirectionTolerance(1e-3)
+
     image = _read_image_tolerating_mislabeled_gzip(image_path, sitk.sitkFloat32)
     mask = _read_image_tolerating_mislabeled_gzip(mask_path, sitk.sitkUInt8)
 
