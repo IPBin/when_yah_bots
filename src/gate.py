@@ -18,19 +18,34 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         raw: `RawBranch` from `instances.find_raw_branches`.
         geom: `BranchGeom` from `geometry.measure` for the same instance.
         profile: `Profile` from `intensity.profile_aorta`.
-        cfg: parsed config. Uses min_extent_mm (mm), min_radius_mm (mm),
-            patch_area_min_mm2/patch_area_max_mm2 (mm^2), hu_ratio_min
-            (unitless), tortuosity_max (unitless).
+        cfg: parsed config. Uses min_extent_mm (mm), max_extent_mm (mm),
+            min_radius_mm (mm), patch_area_min_mm2/patch_area_max_mm2 (mm^2),
+            hu_ratio_min (unitless), tortuosity_max (unitless),
+            max_mean_cross_section_mm2 (mm^2).
 
     Returns:
         (keep, reason): `keep` is bool. `reason` is a short string
         explaining the decision (e.g. "ok", "below_min_radius",
         "patch_too_small", "patch_too_large", "low_hu_ratio",
-        "too_tortuous", "insufficient_extent"), always populated and logged
-        when cfg['log_rejections'].
+        "too_tortuous", "insufficient_extent", "excessive_extent",
+        "blobby_leak"), always populated and logged when
+        cfg['log_rejections'].
+
+    Notes:
+        `excessive_extent` and `blobby_leak` both guard against the same
+        real failure mode observed on real cases: a candidate component that
+        leaked into bone or an enhancing organ can still pass every other
+        check (it touches the legal wall, clears min_extent_mm, and can even
+        sit inside hu_ratio_min), because nothing else here bounds how large
+        or how thick the component is. Real first-order aortic daughters top
+        out around ~3.5 mm radius (celiac/SMA; see docs/brief.md), so a
+        candidate whose geodesic extent or average cross-section is far
+        beyond that is structurally not a branch, regardless of its HU.
     """
     if raw.geodesic_extent_mm < float(cfg["min_extent_mm"]):
         return False, "insufficient_extent"
+    if raw.geodesic_extent_mm > float(cfg["max_extent_mm"]):
+        return False, "excessive_extent"
     if geom.radius_mm < float(cfg["min_radius_mm"]):
         return False, "below_min_radius"
     if raw.patch_area_mm2 < float(cfg["patch_area_min_mm2"]):
@@ -39,6 +54,8 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         return False, "patch_too_large"
     if raw.hu_ratio < float(cfg["hu_ratio_min"]):
         return False, "low_hu_ratio"
+    if raw.mean_cross_section_mm2 > float(cfg["max_mean_cross_section_mm2"]):
+        return False, "blobby_leak"
     if geom.tortuosity > float(cfg["tortuosity_max"]):
         return False, "too_tortuous"
     return True, "ok"

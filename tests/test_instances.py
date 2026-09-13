@@ -40,8 +40,12 @@ def test_single_branch_yields_one_instance_with_plausible_geometry():
     # branch sticks out ~12 mm beyond the aortic surface
     assert 8.0 <= rb.geodesic_extent_mm <= 16.0
     assert rb.hu_ratio > 0.9  # same HU as the aorta lumen by construction
-    # patch sits on a slice well clear of both end caps
-    assert np.all(np.abs(rb.patch_zyx[:, 0] - branch["z"]) <= 5)
+    # patch sits on a slice well clear of both end caps: the tolerance scales
+    # with cfg['patch_bridge_mm'] (real-data gap between a candidate
+    # component and its own contact patch), since a bigger bridge dilates
+    # the candidate further along the wall before intersecting it.
+    bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / float(cfg["iso_mm"])))
+    assert np.all(np.abs(rb.patch_zyx[:, 0] - branch["z"]) <= bridge_iters + 4)
 
 
 def test_two_separated_branches_are_not_merged_into_one_instance():

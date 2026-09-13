@@ -33,6 +33,14 @@ class RawBranch:
         patch_area_mm2: physical area (mm^2) of the contact patch.
         mean_hu: mean HU of the CT within `voxels_zyx`.
         hu_ratio: mean_hu / profile.a_med (unitless).
+        mean_cross_section_mm2: mean cross-sectional area (mm^2) along the
+            instance's length, estimated as
+            (voxel_count * voxel_volume_mm3) / geodesic_extent_mm. A real
+            proximal branch stays roughly tube-shaped (celiac/SMA top out
+            around ~3.5 mm radius, i.e. ~38 mm^2), so a candidate whose
+            average cross-section is far larger than any plausible vessel
+            is a blobby leak into bone/an organ, not a branch -- this is
+            what `gate.accept`'s `max_mean_cross_section_mm2` check rejects.
     """
 
     patch_zyx: np.ndarray
@@ -41,6 +49,7 @@ class RawBranch:
     patch_area_mm2: float
     mean_hu: float
     hu_ratio: float
+    mean_cross_section_mm2: float
 
 
 def _bbox_slices(mask: np.ndarray, pad: int) -> tuple:
@@ -68,6 +77,7 @@ def _split_component(
     comp_mask: np.ndarray,
     patch_mask: np.ndarray,
     iso_mm: float,
+    bridge_iters: int,
     outer_offset: np.ndarray = None,
 ) -> list:
     """One candidate component plus its (possibly multi-piece) contact patch
@@ -79,20 +89,25 @@ def _split_component(
     is that crop's own [z,y,x] origin, added on top of the bbox this function
     finds within its own (possibly already-local) inputs, so the returned
     `patch_zyx`/`voxels_zyx` are always in the full case's voxel indices.
+    `bridge_iters` (voxels, derived from cfg['patch_bridge_mm']) is the
+    dilation radius used to bridge the gap between a component and its own
+    contact patch -- see `find_raw_branches` for why this must be tunable
+    rather than a hardcoded value.
     """
     patch_labeled, n_patches = ndimage.label(patch_mask, structure=_STRUCT_3D)
     if n_patches == 0:
         return []
 
-    bbox = _bbox_slices(comp_mask | patch_mask, pad=2)
+    bbox = _bbox_slices(comp_mask | patch_mask, pad=bridge_iters)
     comp_local = comp_mask[bbox]
     patch_local = patch_labeled[bbox]
 
-    # `comp_local` sits up to 2 voxels from its patch (the buffer stripped
-    # out around the aorta in `find_raw_branches`), so the MCP cost region
-    # must bridge that gap via the patch's own dilation, or the race can
-    # never reach the component at all.
-    patch_bridge = ndimage.binary_dilation(patch_local > 0, structure=_STRUCT_3D, iterations=2)
+    # `comp_local` sits up to `bridge_iters` voxels from its patch (the
+    # buffer stripped out around the aorta in `find_raw_branches`, plus real
+    # segmentation/partial-volume noise at the aortic wall on real cases),
+    # so the MCP cost region must bridge that gap via the patch's own
+    # dilation, or the race can never reach the component at all.
+    patch_bridge = ndimage.binary_dilation(patch_local > 0, structure=_STRUCT_3D, iterations=bridge_iters)
     region = comp_local | patch_bridge
     costs = np.where(region, 1.0, np.inf)
     seeds = [tuple(c) for c in np.argwhere(patch_local > 0)]
@@ -155,6 +170,18 @@ def _split_component(
         mean_hu = float(hu_values.mean())
         hu_ratio = mean_hu / profile.a_med if profile.a_med else 0.0
 
+        # See RawBranch.mean_cross_section_mm2 docstring: total voxel volume
+        # divided by the geodesic extent approximates the average tube
+        # cross-section, which is what separates a real thin branch from a
+        # blobby leak into bone/an enhancing organ (both can pass the HU and
+        # min-extent checks alone -- see gate.accept).
+        voxel_volume_mm3 = iso_mm ** 3
+        mean_cross_section_mm2 = (
+            (voxels_zyx.shape[0] * voxel_volume_mm3) / geodesic_extent_mm
+            if geodesic_extent_mm > 0
+            else float(voxels_zyx.shape[0]) * voxel_volume_mm3
+        )
+
         raw_branches.append(
             RawBranch(
                 patch_zyx=patch_zyx,
@@ -163,6 +190,7 @@ def _split_component(
                 patch_area_mm2=patch_area_mm2,
                 mean_hu=mean_hu,
                 hu_ratio=hu_ratio,
+                mean_cross_section_mm2=mean_cross_section_mm2,
             )
         )
     return raw_branches
@@ -202,6 +230,10 @@ def find_raw_branches(
     """
     iso_mm = float(cfg["iso_mm"])
     max_branch_voxels = int(cfg.get("max_branch_voxels", 50000))
+    # `patch_bridge_mm` (real-data gap between a candidate component and its
+    # own contact patch, after the 1-voxel aorta-mask buffer stripped below)
+    # converted to a voxel dilation radius, never below 1.
+    bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / iso_mm))
 
     non_aorta = cand & ~ndimage.binary_dilation(case.aorta_np, structure=_STRUCT_3D, iterations=1)
     labeled, n_components = ndimage.label(non_aorta, structure=_STRUCT_3D)
@@ -227,24 +259,27 @@ def find_raw_branches(
         # cost of this loop.
         raw_bbox = component_bboxes[comp_id - 1]
         bbox = tuple(
-            slice(max(s.start - 2, 0), min(s.stop + 2, dim))
+            slice(max(s.start - bridge_iters, 0), min(s.stop + bridge_iters, dim))
             for s, dim in zip(raw_bbox, labeled.shape)
         )
         comp_local = labeled[bbox] == comp_id
         legal_wall_local = frame.legal_wall_np[bbox]
 
-        # Dilated by 2, not 1: `non_aorta` already had a 1-voxel buffer
-        # around the aorta stripped out (above), so a component sitting
-        # right at that buffer's edge is 2 voxels, not 1, from the nearest
-        # legal wall voxel.
-        comp_dilated_local = ndimage.binary_dilation(comp_local, structure=_STRUCT_3D, iterations=2)
+        # Dilated by `bridge_iters`, not 1: `non_aorta` already had a
+        # 1-voxel buffer around the aorta stripped out (above), and real
+        # cases show additional segmentation/partial-volume gaps between a
+        # component and the nearest legal wall voxel (cfg['patch_bridge_mm']
+        # -- see config/default.yaml for the real-data rationale).
+        comp_dilated_local = ndimage.binary_dilation(comp_local, structure=_STRUCT_3D, iterations=bridge_iters)
         patch_mask_local = comp_dilated_local & legal_wall_local
         if not patch_mask_local.any():
             continue  # doesn't touch the legal wall at all -> not an ostium
 
         outer_offset = np.array([s.start for s in bbox])
         raw_branches.extend(
-            _split_component(case, profile, comp_local, patch_mask_local, iso_mm, outer_offset=outer_offset)
+            _split_component(
+                case, profile, comp_local, patch_mask_local, iso_mm, bridge_iters, outer_offset=outer_offset
+            )
         )
 
     return raw_branches

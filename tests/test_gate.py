@@ -14,7 +14,7 @@ def _load_cfg():
         return yaml.safe_load(f)
 
 
-def _raw(extent=8.0, patch_area=20.0, hu_ratio=0.95):
+def _raw(extent=8.0, patch_area=20.0, hu_ratio=0.95, cross_section=4.0):
     return RawBranch(
         patch_zyx=np.zeros((4, 3), dtype=int),
         voxels_zyx=np.zeros((10, 3), dtype=int),
@@ -22,6 +22,7 @@ def _raw(extent=8.0, patch_area=20.0, hu_ratio=0.95):
         patch_area_mm2=patch_area,
         mean_hu=330.0,
         hu_ratio=hu_ratio,
+        mean_cross_section_mm2=cross_section,
     )
 
 
@@ -84,6 +85,27 @@ def test_accept_rejects_too_tortuous():
     keep, reason = accept(_raw(), _geom(tortuosity=10.0), _profile(), cfg)
     assert not keep
     assert reason == "too_tortuous"
+
+
+def test_accept_rejects_excessive_extent():
+    """Regression guard: a candidate whose geodesic extent is far beyond any
+    plausible proximal branch stub (observed on real cases as 50-200mm bone/
+    organ leaks) must be rejected outright, before any other check."""
+    cfg = _load_cfg()
+    keep, reason = accept(_raw(extent=150.0), _geom(), _profile(), cfg)
+    assert not keep
+    assert reason == "excessive_extent"
+
+
+def test_accept_rejects_blobby_leak():
+    """Regression guard: a candidate whose average cross-section is far
+    thicker than any real first-order aortic daughter (observed on real
+    cases as 100-350mm2 leaks into bone/an enhancing organ) must be
+    rejected even if its HU ratio and extent both look plausible."""
+    cfg = _load_cfg()
+    keep, reason = accept(_raw(cross_section=200.0), _geom(), _profile(), cfg)
+    assert not keep
+    assert reason == "blobby_leak"
 
 
 def test_dedup_merges_close_same_direction_duplicates():
