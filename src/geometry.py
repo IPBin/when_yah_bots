@@ -90,7 +90,8 @@ def measure(
             nudging of the ostium).
         profile: `Profile` from `intensity.profile_aorta`.
         cfg: parsed config. Uses trace_max_mm, seed_arc_mm, path_step_mm,
-            pca_window_mm, seed_snap_mm (mm, mm, mm, [mm,mm], mm).
+            pca_window_mm, seed_snap_mm, patch_bridge_mm
+            (mm, mm, mm, [mm,mm], mm, mm).
 
     Returns:
         A `BranchGeom` per the dataclass docstring above. The Euclidean
@@ -105,6 +106,13 @@ def measure(
     path_step_mm = float(cfg["path_step_mm"])
     pca_lo, pca_hi = cfg["pca_window_mm"]
     seed_snap_mm = float(cfg["seed_snap_mm"])
+    # Same real-data gap as `instances.find_raw_branches`'s max_bridge_iters
+    # -- see config/default.yaml patch_bridge_mm for the rationale. Used
+    # here only to bridge `raw.patch_zyx`/`raw.voxels_zyx` (already fixed
+    # by the time this runs) for path-finding, so a generous fixed cap is
+    # safe -- it cannot inflate `raw.patch_area_mm2` the way a fixed
+    # dilation in `find_raw_branches` did (that one is adaptive, see there).
+    bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / iso_mm))
 
     # --- ostium: patch centroid, nudged half a voxel out to the true wall
     # surface (the mask boundary sits between the last inside voxel centre
@@ -122,15 +130,16 @@ def measure(
     patch_full = np.zeros(shape, dtype=bool)
     patch_full[raw.patch_zyx[:, 0], raw.patch_zyx[:, 1], raw.patch_zyx[:, 2]] = True
 
-    bbox = _bbox_slices(body_full | patch_full, pad=2)
+    bbox = _bbox_slices(body_full | patch_full, pad=bridge_iters)
     body_local = body_full[bbox]
     patch_local = patch_full[bbox]
     offset = np.array([s.start for s in bbox])
 
     # Same buffer-bridging issue as `instances._split_component`: the patch
-    # (aortic wall) and the branch body sit up to 2 voxels apart because
-    # `find_raw_branches` strips a 1-voxel halo around the aorta.
-    patch_bridge = ndimage.binary_dilation(patch_local, structure=_STRUCT_3D, iterations=2)
+    # (aortic wall) and the branch body sit up to `bridge_iters` voxels apart
+    # because `find_raw_branches` strips a 1-voxel halo around the aorta,
+    # plus real segmentation/partial-volume gaps (cfg['patch_bridge_mm']).
+    patch_bridge = ndimage.binary_dilation(patch_local, structure=_STRUCT_3D, iterations=bridge_iters)
     region_local = body_local | patch_bridge
 
     edt_local = ndimage.distance_transform_edt(body_local, sampling=(iso_mm,) * 3)

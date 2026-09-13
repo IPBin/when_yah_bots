@@ -141,7 +141,16 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
 
         accepted = []
         for raw in raw_branches:
-            geom = measure(case, raw, frame, profile, cfg)
+            # A single degenerate candidate (e.g. too few voxels for the
+            # MCP path solver to find any route to its own extent target)
+            # must never crash the whole case -- log it as a rejection and
+            # keep processing every other candidate.
+            try:
+                geom = measure(case, raw, frame, profile, cfg)
+            except Exception as exc:  # noqa: BLE001 - per-candidate robustness
+                if cfg.get("log_rejections"):
+                    warnings.append(f"rejected: measure_failed ({exc})")
+                continue
             keep, reason = accept(raw, geom, profile, cfg)
             if keep:
                 accepted.append((raw, geom))
