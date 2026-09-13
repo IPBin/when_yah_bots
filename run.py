@@ -11,15 +11,17 @@ Also accepts plain .nii for --image / --aorta-mask.
 
 import argparse
 import json
+import os
 import time
 import traceback
 
+import numpy as np
 import yaml
 
 from src.io_geom import load_case
 from src.intensity import profile_aorta
 from src.candidates import candidate_mask
-from src.aorta_frame import build_frame
+from src.aorta_frame import AortaFrame, build_frame, clock_and_arclen
 from src.instances import find_raw_branches
 from src.geometry import measure
 from src.gate import accept, dedup
@@ -52,6 +54,40 @@ def load_config(config_path: str) -> dict:
     """
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
+
+
+def _local_tangent(frame: AortaFrame, xyz_mm: np.ndarray) -> np.ndarray:
+    """Unit tangent of the aortic centreline nearest a given physical point.
+
+    Args:
+        frame: `AortaFrame` from `aorta_frame.build_frame`.
+        xyz_mm: physical point (x, y, z) in mm (typically a branch ostium).
+
+    Returns:
+        np.ndarray, shape (3,), unit vector along `frame.centreline_mm`
+        (superior -> inferior ordering) at the point nearest `xyz_mm`, via a
+        local finite difference. Zero vector if the centreline has fewer
+        than two points or the local segment is degenerate.
+    """
+    centre = frame.centreline_mm
+    if centre.shape[0] < 2:
+        return np.zeros(3)
+    idx = int(np.argmin(np.linalg.norm(centre - xyz_mm[np.newaxis, :], axis=1)))
+    lo = max(idx - 1, 0)
+    hi = min(idx + 1, centre.shape[0] - 1)
+    tangent = centre[hi] - centre[lo]
+    norm = np.linalg.norm(tangent)
+    return tangent / norm if norm > 1e-9 else np.zeros(3)
+
+
+def _takeoff_angle_deg(direction: np.ndarray, tangent: np.ndarray) -> float:
+    """Angle in degrees between a branch direction and the local aortic axis."""
+    norm_d = np.linalg.norm(direction)
+    norm_t = np.linalg.norm(tangent)
+    if norm_d < 1e-9 or norm_t < 1e-9:
+        return float("nan")
+    cos_t = float(np.clip(np.dot(direction, tangent) / (norm_d * norm_t), -1.0, 1.0))
+    return float(np.degrees(np.arccos(cos_t)))
 
 
 def empty_result(case_id: str, warnings: list) -> dict:
@@ -93,7 +129,7 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
     """
     t0 = time.time()
     warnings = []
-    case_id = image_path.split("/")[-1].split(".")[0]
+    case_id = os.path.basename(os.path.dirname(image_path)) or image_path.split("/")[-1].split(".")[0]
     try:
         case = load_case(image_path, mask_path, cfg)
         case_id = case.case_id
@@ -116,6 +152,9 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
 
         daughters = []
         for i, (raw, geom) in enumerate(accepted):
+            clock_hours, arclen_mm = clock_and_arclen(frame, geom.ostium_mm)
+            tangent = _local_tangent(frame, geom.ostium_mm)
+            takeoff_deg = _takeoff_angle_deg(geom.direction, tangent)
             daughters.append(
                 {
                     "instance_id": f"branch_{i + 1:03d}",
@@ -125,9 +164,9 @@ def run_case(image_path: str, mask_path: str, cfg: dict) -> dict:
                     "radius_mm": float(geom.radius_mm),
                     "direction_xyz": geom.direction.tolist(),
                     "confidence": 1.0,
-                    "clock_position": None,
-                    "arclen_from_top_mm": None,
-                    "takeoff_angle_deg": None,
+                    "clock_position": float(clock_hours),
+                    "arclen_from_top_mm": float(arclen_mm),
+                    "takeoff_angle_deg": takeoff_deg,
                 }
             )
 

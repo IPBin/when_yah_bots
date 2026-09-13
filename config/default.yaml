@@ -7,9 +7,9 @@ iso_mm: 1.0                 # isotropic resample spacing (mm)
 roi_margin_mm: 50.0         # padding around the aorta bounding box (mm)
 
 # intensity thresholds (all relative to the aortic lumen)
-k_vessel: 2.0               # t_vessel = a_med - k_vessel*(a_med - a_p10)
-frac_vessel: 0.55           # ...floored at frac_vessel * a_med
-frac_high: 0.85             # hysteresis seed level
+k_vessel: 3.0               # t_vessel = a_med - k_vessel*(a_med - a_p10)
+frac_vessel: 0.35           # ...floored at frac_vessel * a_med
+frac_high: 0.75             # hysteresis seed level
 vessel_hu_floor: 120.0      # absolute floor, never threshold below this
 bone_offset: 300.0          # t_bone = a_med + bone_offset
 bone_dilate_mm: 1.5
