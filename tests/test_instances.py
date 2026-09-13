@@ -18,6 +18,7 @@ from src.aorta_frame import AortaFrame, build_frame
 from src.instances import find_raw_branches
 
 from tests.synth import make_case_with_branches, AORTA_HU, BACKGROUND_HU
+from eval.phantom import make_phantom
 
 
 def _load_cfg():
@@ -167,6 +168,38 @@ def test_oversized_component_is_skipped_before_dilation():
     assert raw[0].voxels_zyx.shape[0] <= cfg["max_branch_voxels"]
     # the surviving instance's patch must be the real branch's, not the leak's
     assert np.all(raw[0].patch_zyx[:, 1] < 15)
+
+
+def test_find_raw_branches_finds_the_official_phantom_branch():
+    """Regression guard for the real-data `patch_bridge_mm` fix (§7
+    recall-hunting notes, docs/scoreboard.md pass #2): the adaptive bridge
+    search in `find_raw_branches` must find the same single, tight-patch
+    branch on the official synthetic phantom (`eval/phantom.py`) that it did
+    before `patch_bridge_mm` existed. A fixed (non-adaptive) bridge dilation
+    regressed this to zero raw branches by smearing the component's contact
+    patch across too much of the legal wall, so this locks the adaptive
+    behaviour in place.
+    """
+    cfg = _load_cfg()
+    branches = [
+        {"theta_deg": 0.0, "arclen_mm": 80.0, "direction_xyz": (1.0, 0.0, -0.1), "radius_mm": 2.5, "length_mm": 12.0},
+    ]
+    ct, mask, ref = make_phantom(branches, shape=(100, 100, 100))
+    ct_np = sitk.GetArrayFromImage(ct).astype(np.float32)
+    aorta_np = sitk.GetArrayFromImage(mask).astype(bool)
+    case = Case(ct=ct, aorta=mask, ct_np=ct_np, aorta_np=aorta_np, case_id="phantom")
+
+    a_med = float(ref["meta"]["a_med_hu"])
+    profile = Profile(a_med=a_med, a_p10=a_med - 50.0, a_iqr=40.0, t_vessel=a_med - 60.0, t_high=a_med - 20.0, t_bone=900.0)
+    cand = ct_np > profile.t_vessel
+
+    frame = build_frame(case, cfg)
+    raw = find_raw_branches(case, cand, frame, profile, cfg)
+
+    assert len(raw) == 1
+    # a real ostium's contact patch stays well under the gate's upper bound,
+    # not smeared across a wide strip of wall by an over-eager fixed bridge
+    assert raw[0].patch_area_mm2 <= float(cfg["patch_area_max_mm2"])
 
 
 def test_find_raw_branches_uses_cropped_dilation_not_full_volume(monkeypatch):

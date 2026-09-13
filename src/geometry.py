@@ -106,8 +106,12 @@ def measure(
     path_step_mm = float(cfg["path_step_mm"])
     pca_lo, pca_hi = cfg["pca_window_mm"]
     seed_snap_mm = float(cfg["seed_snap_mm"])
-    # Same real-data gap as `instances.find_raw_branches`'s bridge_iters --
-    # see config/default.yaml patch_bridge_mm for the rationale.
+    # Same real-data gap as `instances.find_raw_branches`'s max_bridge_iters
+    # -- see config/default.yaml patch_bridge_mm for the rationale. Used
+    # here only to bridge `raw.patch_zyx`/`raw.voxels_zyx` (already fixed
+    # by the time this runs) for path-finding, so a generous fixed cap is
+    # safe -- it cannot inflate `raw.patch_area_mm2` the way a fixed
+    # dilation in `find_raw_branches` did (that one is adaptive, see there).
     bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / iso_mm))
 
     # --- ostium: patch centroid, nudged half a voxel out to the true wall

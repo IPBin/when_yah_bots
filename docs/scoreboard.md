@@ -56,3 +56,42 @@ number. Also worth checking whether `excessive_extent`/`max_extent_mm`
 (40mm) and `patch_too_large` (`patch_area_max_mm2`, 120mm^2) are still the
 right cutoffs now that patches are found with a wider bridge (patches are
 measurably larger post-fix, since the search radius is wider).
+
+## 2026-09-13 -- Person A, recall-hunting pass #2 (regression fix)
+
+Pass #1's `patch_bridge_mm` fix was a **fixed** dilation of `bridge_iters`
+voxels applied to every component, which regressed the synthetic phantom
+(`eval/phantom.py`, `data/phantom_p3/`): the phantom went from 1/1 correct
+daughters (committed `data/phantom_p3/prediction.json`) to 0/1, because
+dilating a whole tubular component by ~4 voxels smears its "shadow" across
+a much wider strip of the legal wall than the true, tight ostium contact
+point -- `patch_area_mm2` on the phantom's real branch blew up from ~9mm^2
+to 236-298mm^2, past `patch_area_max_mm2` (120mm^2), and its
+`geodesic_extent_mm` also shrank under `min_extent_mm` because the wider
+patch ends up closer (in geodesic terms) to the target voxel.
+
+Fix: made the bridge **adaptive** instead of fixed. `find_raw_branches` now
+tries `bridge_iters = 1, 2, ..., max_bridge_iters` (the latter from
+`cfg['patch_bridge_mm']`) and stops at the *first* iteration where the
+dilated component touches the legal wall, using that (minimal) patch. This
+keeps the phantom's tight 1-voxel gap exactly as tight as before while
+still finding real cases' wider (up to ~6mm) gaps when a 1-2 voxel bridge
+genuinely isn't enough.
+
+Result: phantom back to 1/1 correct daughter (`ostium_xyz_mm` matches the
+committed reference exactly: `[59.5, 49.5, 80.0]`). Real cases *improved*
+over pass #1 (tighter patches -> less over-rejection):
+
+| case | daughters (pass #1, fixed bridge) | daughters (pass #2, adaptive bridge) |
+|---|---|---|
+| orig19 | 7 | 8 |
+| orig20 | 9 | 12 |
+| orig21 | 9 | 17 |
+| orig22 | 8 | 11 |
+| orig23 | 5 | 7 |
+
+Runtimes unchanged (1.7-6.6s/case, still far under the 60s target).
+`pytest tests/ -q`: 49/49 passing. This is the sharper lesson for future
+threshold work on this repo: **always re-check the phantom after any
+change that could touch patch geometry**, not just the real-case daughter
+counts -- the phantom is the only ground truth we currently have.

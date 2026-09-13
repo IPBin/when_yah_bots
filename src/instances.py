@@ -232,8 +232,14 @@ def find_raw_branches(
     max_branch_voxels = int(cfg.get("max_branch_voxels", 50000))
     # `patch_bridge_mm` (real-data gap between a candidate component and its
     # own contact patch, after the 1-voxel aorta-mask buffer stripped below)
-    # converted to a voxel dilation radius, never below 1.
-    bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / iso_mm))
+    # converted to a MAXIMUM voxel dilation radius, never below 1. Used as a
+    # cap on an adaptive search (see below), not a fixed dilation: dilating
+    # a whole tubular component by several voxels can smear its "shadow"
+    # across a much wider strip of the legal wall than the true, tight
+    # contact point, inflating patch_area_mm2 well past what a real ostium
+    # looks like (observed regressing the synthetic phantom after this was
+    # first tried as a fixed radius).
+    max_bridge_iters = max(1, round(float(cfg["patch_bridge_mm"]) / iso_mm))
 
     non_aorta = cand & ~ndimage.binary_dilation(case.aorta_np, structure=_STRUCT_3D, iterations=1)
     labeled, n_components = ndimage.label(non_aorta, structure=_STRUCT_3D)
@@ -252,27 +258,36 @@ def find_raw_branches(
             # enhancing organ, not worth a single expensive operation.
             continue
 
-        # Crop to this component's own bounding box (padded) *before* any
-        # dilation: `comp_mask`/`comp_dilated` used to be full case-volume
-        # arrays even for a branch stub a few dozen voxels across, which
-        # made the dilation below (and the legal-wall AND) the dominant
-        # cost of this loop.
+        # Crop to this component's own bounding box, padded to the maximum
+        # possible bridge, *before* any dilation: `comp_mask`/`comp_dilated`
+        # used to be full case-volume arrays even for a branch stub a few
+        # dozen voxels across, which made the dilation below (and the
+        # legal-wall AND) the dominant cost of this loop.
         raw_bbox = component_bboxes[comp_id - 1]
         bbox = tuple(
-            slice(max(s.start - bridge_iters, 0), min(s.stop + bridge_iters, dim))
+            slice(max(s.start - max_bridge_iters, 0), min(s.stop + max_bridge_iters, dim))
             for s, dim in zip(raw_bbox, labeled.shape)
         )
         comp_local = labeled[bbox] == comp_id
         legal_wall_local = frame.legal_wall_np[bbox]
 
-        # Dilated by `bridge_iters`, not 1: `non_aorta` already had a
-        # 1-voxel buffer around the aorta stripped out (above), and real
-        # cases show additional segmentation/partial-volume gaps between a
-        # component and the nearest legal wall voxel (cfg['patch_bridge_mm']
-        # -- see config/default.yaml for the real-data rationale).
-        comp_dilated_local = ndimage.binary_dilation(comp_local, structure=_STRUCT_3D, iterations=bridge_iters)
-        patch_mask_local = comp_dilated_local & legal_wall_local
-        if not patch_mask_local.any():
+        # Adaptive bridge: start at 1 voxel (the synthetic-phantom case,
+        # where the gap is exactly the 1-voxel aorta-mask buffer stripped
+        # above) and grow only as far as `max_bridge_iters` (real-data
+        # partial-volume/segmentation gaps, cfg['patch_bridge_mm']) until
+        # the dilated component first touches the legal wall. Using the
+        # *smallest* dilation that makes contact keeps the resulting patch
+        # as tight as the true ostium footprint, instead of a fixed large
+        # dilation smearing a whole tubular component's "shadow" across a
+        # much wider strip of wall than the real contact point.
+        patch_mask_local = None
+        for bridge_iters in range(1, max_bridge_iters + 1):
+            comp_dilated_local = ndimage.binary_dilation(comp_local, structure=_STRUCT_3D, iterations=bridge_iters)
+            candidate_patch = comp_dilated_local & legal_wall_local
+            if candidate_patch.any():
+                patch_mask_local = candidate_patch
+                break
+        if patch_mask_local is None:
             continue  # doesn't touch the legal wall at all -> not an ostium
 
         outer_offset = np.array([s.start for s in bbox])
