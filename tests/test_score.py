@@ -71,6 +71,32 @@ def test_empty_daughters_does_not_crash():
 
 
 def test_score_directory_matches_cases_by_id(tmp_path):
+    """With more than one file per directory (so the single-file shortcut in
+    `_load_json_dir` doesn't apply), cases must still be paired by their own
+    `case_id` field, not by filename."""
+    pred_dir = tmp_path / "pred"
+    ref_dir = tmp_path / "ref"
+    pred_dir.mkdir()
+    ref_dir.mkdir()
+
+    pred1 = {"case_id": "fake001", "daughters": REF["daughters"]}
+    ref2 = {"case_id": "fake002", "daughters": []}
+    pred2 = {"case_id": "fake002", "daughters": []}
+    (pred_dir / "fake001.json").write_text(json.dumps(pred1))
+    (ref_dir / "fake001.json").write_text(json.dumps(REF))
+    (pred_dir / "fake002.json").write_text(json.dumps(pred2))
+    (ref_dir / "fake002.json").write_text(json.dumps(ref2))
+
+    result = score_directory(str(pred_dir), str(ref_dir))
+    assert "fake001" in result["per_case"]
+    assert "fake002" in result["per_case"]
+    assert result["summary"][5.0]["micro"]["f1"] == pytest.approx(1.0)
+
+
+def test_score_directory_single_file_pair_uses_generic_key(tmp_path):
+    """With exactly one file per directory, pairing must not depend on
+    `case_id` matching between them -- see
+    `test_score_directory_pairs_single_files_despite_mismatched_case_id`."""
     pred_dir = tmp_path / "pred"
     ref_dir = tmp_path / "ref"
     pred_dir.mkdir()
@@ -81,5 +107,24 @@ def test_score_directory_matches_cases_by_id(tmp_path):
     (ref_dir / "fake001.json").write_text(json.dumps(REF))
 
     result = score_directory(str(pred_dir), str(ref_dir))
-    assert "fake001" in result["per_case"]
+    assert len(result["per_case"]) == 1
+    assert result["summary"][5.0]["micro"]["f1"] == pytest.approx(1.0)
+
+
+def test_score_directory_pairs_single_files_despite_mismatched_case_id(tmp_path):
+    """A lone prediction file must pair with a lone reference file even when
+    the `case_id` field inside each JSON doesn't match -- there's no
+    ambiguity to resolve with only one file on each side."""
+    pred_dir = tmp_path / "pred"
+    ref_dir = tmp_path / "ref"
+    pred_dir.mkdir()
+    ref_dir.mkdir()
+
+    pred = {"case_id": "whatever_the_pipeline_called_it", "daughters": REF["daughters"]}
+    ref = {"case_id": "the_official_reference_id", "daughters": REF["daughters"]}
+    (pred_dir / "prediction.json").write_text(json.dumps(pred))
+    (ref_dir / "reference.json").write_text(json.dumps(ref))
+
+    result = score_directory(str(pred_dir), str(ref_dir))
+    assert len(result["per_case"]) == 1
     assert result["summary"][5.0]["micro"]["f1"] == pytest.approx(1.0)

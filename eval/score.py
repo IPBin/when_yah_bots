@@ -138,10 +138,27 @@ def _aggregate(per_case: dict, thr: float, key: str, kind: str):
     return float(np.mean(values)) if values else float("nan")
 
 
+_SINGLE_FILE_KEY = "single_case"
+
+
 def _load_json_dir(path: str) -> dict:
-    """Load every *.json file in `path` into a dict keyed by case_id."""
+    """Load every *.json file in `path` into a dict keyed by case_id.
+
+    Exception: if `path` contains exactly one .json file, it is keyed by a
+    fixed generic key instead of its own `case_id` field. This lets a
+    single prediction file always pair with a single reference file in
+    `score_directory`, regardless of what `case_id` each JSON claims (they
+    need not even agree with each other, or with either file's name) --
+    there's no ambiguity to resolve when each side has only one file, so the
+    internal `case_id` shouldn't be trusted for it.
+    """
+    files = sorted(glob.glob(os.path.join(path, "*.json")))
+    if len(files) == 1:
+        with open(files[0], "r") as f:
+            return {_SINGLE_FILE_KEY: json.load(f)}
+
     out = {}
-    for fp in sorted(glob.glob(os.path.join(path, "*.json"))):
+    for fp in files:
         with open(fp, "r") as f:
             data = json.load(f)
         case_id = data.get("case_id", os.path.splitext(os.path.basename(fp))[0])
