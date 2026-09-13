@@ -39,7 +39,8 @@ max_extent_mm: 40.0         # owner: A -- reject candidates whose geodesic exten
 min_radius_mm: 0.8          # <<< THE UNANNOUNCED SIZE RULE. Sweep 0.5-2.0 first.
 patch_area_min_mm2: 1.0
 patch_area_max_mm2: 120.0
-hu_ratio_min: 0.70
+hu_ratio_min: 0.65  # owner: A -- lowered from 0.70 after pass #4: verified isolated to orig22 (0 low_hu_ratio rejections on the other 4 dev cases at 0.70), rescues exactly one otherwise-plausible candidate (extent 9.97mm, patch_area 19mm^2, xsec 1.50mm^2) with zero effect elsewhere -- see docs/scoreboard.md pass #4
+min_mean_cross_section_mm2: 1.5  # owner: A -- real-data noise floor: single/few-voxel threshold specks clear min_extent_mm only because the wall-bridge dilation inflates their geodesic_extent_mm; genuine branch stubs measured >=~4mm^2 on the dev set, noise sat <=~1.5mm^2 (see docs/scoreboard.md pass #3)
 max_mean_cross_section_mm2: 50.0  # owner: A -- reject blobby leaks (bone/organ); real celiac/SMA top out ~38mm2 (r~3.5mm)
 tortuosity_max: 2.0
 

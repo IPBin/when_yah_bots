@@ -95,3 +95,95 @@ Runtimes unchanged (1.7-6.6s/case, still far under the 60s target).
 threshold work on this repo: **always re-check the phantom after any
 change that could touch patch geometry**, not just the real-case daughter
 counts -- the phantom is the only ground truth we currently have.
+
+## 2026-09-13 -- Person A + Person B, pass #3 (organizer answer-key counts)
+
+The organizers gave us real per-case daughter-candidate counts for the dev
+set: orig19=3, orig20=4, orig21=3, orig22=6, orig23=3 (19 total). Pass #2's
+counts (8/12/17/11/7 = 55) were ~2.9x over the true total -- worth checking
+before submission even though the pipeline "looked" healthy (no crashes,
+runtimes fine).
+
+**Root cause of the overcount:** `gate.accept` had no lower bound on
+`mean_cross_section_mm2`, only an upper one (`blobby_leak`). Single- or
+few-voxel threshold noise specks (as small as 1-9 voxels) were clearing
+`min_extent_mm` (5mm) because `find_raw_branches`/`geometry.measure` run
+their geodesic-extent search over a region that includes the wall-bridging
+dilation (`patch_bridge_mm`, up to 6mm) -- so a lone noise voxel a few mm
+from the wall gets a measured "extent" close to the bridge distance,
+regardless of the voxel's own size. `mean_cross_section_mm2` is unaffected
+by that inflation (computed only from the candidate's own voxels), so it's
+the right signal to gate on. Added `min_mean_cross_section_mm2: 1.5` (new
+`too_thin` rejection reason in `gate.accept`) -- chosen because on orig19
+the genuine-looking branches (37/112/41 voxels) measured 3.8-5.7mm^2, while
+the noise specks measured 0.13-1.5mm^2, a clean split.
+
+Result: 55 -> 15 total daughters (target 19): orig19=3 (exact), orig20=2,
+orig21=5, orig22=4, orig23=1. `pytest tests/ -q`: 52/52 passing, phantom
+still correct. Real per-case counts are closer but not exact -- we only have
+aggregate counts from the organizers, not reference positions, so the
+remaining gap (some cases still over/under-detect) cannot be root-caused
+further without more reference data.
+
+**Second, separate issue found while investigating:** `radius_mm` reports
+almost exactly 1.0-1.4mm (i.e. quantized to the 1mm iso-grid) on nearly
+every real daughter, vs. the ~1.8-3.5mm expected for real proximal
+branches. Verified this is not a `geometry.measure` bug -- computed the
+true whole-component EDT max directly for several accepted branches and it
+matches the reported radius (~1.0-1.4mm): the candidate mask genuinely is
+only 1-2 voxels wide at these branches' ostia in the real data. Swept
+`k_vessel` (the vessel-threshold aggressiveness) from 3.0 to 10.0: radius
+barely moved (mean stayed 1.0-1.2mm across the whole range) while higher
+values destabilized daughter counts on some cases (orig22 dropped to 0
+daughters at k_vessel>=4, orig23 dropped to 0 at k_vessel=6). Concluded
+this is not a simple HU-threshold fix and reverted to k_vessel=3.0 (no
+change from default) rather than risk detection stability this close to
+the deadline -- documented as a known limitation in `README.md` instead.
+
+## 2026-09-13 -- Person A + Person B, pass #4 (closing the count gap further)
+
+Diagnosed the remaining gap after pass #3 (15/19: orig19=3 exact, orig20=2/4,
+orig21=5/3, orig22=4/6, orig23=1/3) by dumping every raw branch's full
+metric set (voxels, extent, patch_area, hu_ratio, mean_cross_section_mm2,
+gate reason) for orig20/21/22/23, plus a pairwise ostium distance/angle
+matrix for orig21's 5 accepted daughters and a rendered visual overlay of
+all sub-threshold candidates on the real CT (via `src.report.visual_check`,
+scratch-rendered, not committed).
+
+**Ruled out, evidence-based:**
+- **orig21 over-detection is not a dedup miss.** All 10 pairs among its 5
+  accepted daughters are >14mm apart with wildly different directions (see
+  the printed matrix in this session) -- `dedup_dist_mm`/`dedup_angle_deg`
+  are working correctly; these are 5 spatially and directionally distinct
+  detections, not a split duplicate.
+- **Visual inspection of borderline candidates was inconclusive** -- the
+  rendered axial-slice-strip overlays are too small/cluttered to
+  distinguish a real thin branch from noise by eye at this zoom level.
+  Not pursued further (would need a dedicated single-candidate zoomed
+  render per case, not attempted given time).
+- **`max_extent_mm` (40mm) is not a safe global knob.** orig20 and orig23
+  both have plausible-looking rejected candidates (thin, decent hu_ratio,
+  extent 50-140mm) that a higher cap would rescue -- but orig21 (already
+  over-detecting) has *five* similarly-thin candidates in the same
+  50-140mm/xsec<15mm^2 band that a higher cap would also rescue,
+  worsening its over-detection well past 5. Loosening this threshold
+  trades one case's recall for another's precision; not applied.
+
+**Applied:** `hu_ratio_min` lowered from 0.70 to 0.65. Verified first that
+`low_hu_ratio` was orig22's rejection reason on *zero* branches in the
+other 4 cases at 0.70 (i.e. the threshold was already a no-op for them),
+so this change could only affect orig22. Of orig22's 13 `low_hu_ratio`
+rejections, only one (`hu_ratio=0.66`, xsec=1.50, extent=9.97mm,
+patch_area=19mm^2 -- otherwise-plausible geometry, right at the old
+threshold) gets rescued; the other 12 have `mean_cross_section_mm2` well
+under 1.5 and would still fail `too_thin` regardless of `hu_ratio_min`.
+Swept 0.65 and 0.60 to confirm 0.60 doesn't rescue anything further, then
+kept 0.65 (smallest change that captures the one plausible candidate).
+
+Result: 15 -> 16/19 (orig19=3, orig20=2, orig21=5, orig22=5, orig23=1).
+`pytest tests/ -q`: 52/52 passing, phantom unaffected (it never triggers
+`low_hu_ratio`). No other well-evidenced, cross-case-safe fix was found
+for the remaining gap (orig20/23 under-detect, orig21 over-detects) without
+reference ostium positions -- further threshold tuning from here risks
+overfitting to these 5 cases' aggregate counts rather than genuinely
+improving detection on held-out data.

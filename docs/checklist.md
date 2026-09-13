@@ -8,8 +8,8 @@
 - [x] No manual point placement anywhere; fully automatic
 - [x] Predictions for the whole development set, committed (`results/predictions/`, 5/5 real dev cases)
 - [x] Visual checks for ≥3 cases, committed as files (`results/visual_checks/`, orig20/21/22)
-- [x] Variable number of detections demonstrated (0, 2, 7, 8, 2 across the 5 dev cases)
-- [x] Empty `daughters` list handled and tested (orig19 currently yields 0 detections)
+- [x] Variable number of detections demonstrated (3, 2, 5, 5, 1 across the 5 dev cases, post gate fixes — see `docs/scoreboard.md` passes #3-4)
+- [x] Empty `daughters` list handled and tested (`tests/test_score.py::test_empty_daughters_does_not_crash`; no real dev case currently yields 0)
 - [x] `parent_instance_id == "aorta"` on every daughter; all instance IDs unique (checked by `eval/batch.validate_schema`, 0 schema errors on the dev set)
 - [x] Physical coordinate system preserved and verified on anisotropic + rotated phantoms (`tests/test_pipeline_integration.py`, full `run_case` through real NIfTI I/O, identity vs. 0.7/0.7/2.0mm rotated grid)
 - [ ] Runs on all 25 cases, no case-specific code paths, no crashes (only 5/25 real cases available so far)

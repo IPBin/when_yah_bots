@@ -8,30 +8,6 @@
       "instance_id": "branch_001",
       "parent_instance_id": "aorta",
       "ostium_xyz_mm": [
-        11.038172828060627,
-        -172.29733431300966,
-        331.0
-      ],
-      "seed_xyz_mm": [
-        9.181640625,
-        -174.818359375,
-        332.0
-      ],
-      "radius_mm": 1.0,
-      "direction_xyz": [
-        -0.7066295749701023,
-        -0.7066295749701027,
-        -0.03673264971581223
-      ],
-      "confidence": 1.0,
-      "clock_position": 11.636844836647866,
-      "arclen_from_top_mm": 102.66153703798372,
-      "takeoff_angle_deg": 61.09641554900523
-    },
-    {
-      "instance_id": "branch_002",
-      "parent_instance_id": "aorta",
-      "ostium_xyz_mm": [
         15.38841085613152,
         -171.16613784038785,
         341.83898050353145
@@ -53,7 +29,7 @@
       "takeoff_angle_deg": 177.18950606926313
     },
     {
-      "instance_id": "branch_003",
+      "instance_id": "branch_002",
       "parent_instance_id": "aorta",
       "ostium_xyz_mm": [
         22.839499220787584,
@@ -67,65 +43,17 @@
       ],
       "radius_mm": 1.0,
       "direction_xyz": [
-        -0.39570517009912864,
-        -0.8922917011184575,
-        -0.21733140240643822
+        -0.42364470165119755,
+        -0.8979389094003355,
+        0.11929325943993536
       ],
       "confidence": 1.0,
       "clock_position": 10.780636178541444,
       "arclen_from_top_mm": 75.95616828572545,
-      "takeoff_angle_deg": 57.719233515305014
+      "takeoff_angle_deg": 74.95504819169189
     },
     {
-      "instance_id": "branch_004",
-      "parent_instance_id": "aorta",
-      "ostium_xyz_mm": [
-        24.460128642472256,
-        -166.20280532977557,
-        361.788830838323
-      ],
-      "seed_xyz_mm": [
-        21.181640625,
-        -167.818359375,
-        362.0
-      ],
-      "radius_mm": 1.4142135623730951,
-      "direction_xyz": [
-        -0.32436988927195315,
-        -0.7523808926157104,
-        0.5733298940056133
-      ],
-      "confidence": 1.0,
-      "clock_position": 10.452515029097988,
-      "arclen_from_top_mm": 69.19876773683762,
-      "takeoff_angle_deg": 105.4094089897314
-    },
-    {
-      "instance_id": "branch_005",
-      "parent_instance_id": "aorta",
-      "ostium_xyz_mm": [
-        19.22534169429751,
-        -166.68311839341985,
-        414.33207253329186
-      ],
-      "seed_xyz_mm": [
-        20.181640625,
-        -167.818359375,
-        411.0
-      ],
-      "radius_mm": 1.0,
-      "direction_xyz": [
-        0.21644230340825857,
-        -0.8459796127426389,
-        -0.48731019291529515
-      ],
-      "confidence": 1.0,
-      "clock_position": 11.887318133746058,
-      "arclen_from_top_mm": 8.813838445590697,
-      "takeoff_angle_deg": 58.56870897120254
-    },
-    {
-      "instance_id": "branch_006",
+      "instance_id": "branch_003",
       "parent_instance_id": "aorta",
       "ostium_xyz_mm": [
         28.649377042051146,
@@ -149,28 +77,52 @@
       "takeoff_angle_deg": 40.1037286227022
     },
     {
-      "instance_id": "branch_007",
+      "instance_id": "branch_004",
       "parent_instance_id": "aorta",
       "ostium_xyz_mm": [
-        15.117876361009134,
-        -159.75203240371786,
-        402.47754005969693
+        5.372277429851444,
+        -157.25938664011014,
+        328.35309092232376
       ],
       "seed_xyz_mm": [
-        12.181640625,
-        -160.818359375,
-        401.0
+        3.181640625,
+        -154.818359375,
+        325.0
       ],
-      "radius_mm": 1.4142135623730951,
+      "radius_mm": 1.0,
       "direction_xyz": [
-        -0.4345493690750253,
-        -0.08302257928383461,
-        -0.8968133011756443
+        -0.37961162019344113,
+        0.7104308013941159,
+        -0.5926070318892823
       ],
       "confidence": 1.0,
-      "clock_position": 9.822376407161784,
-      "arclen_from_top_mm": 16.88806594735204,
-      "takeoff_angle_deg": 53.40501491359856
+      "clock_position": 6.9923842874372975,
+      "arclen_from_top_mm": 107.78167525830813,
+      "takeoff_angle_deg": 45.79495559613948
+    },
+    {
+      "instance_id": "branch_005",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        23.0067001199477,
+        -154.36859688677285,
+        351.0461139537352
+      ],
+      "seed_xyz_mm": [
+        21.181640625,
+        -150.818359375,
+        351.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.7418312419403806,
+        0.6457563123553812,
+        -0.18079046859381695
+      ],
+      "confidence": 1.0,
+      "clock_position": 6.863422107717355,
+      "arclen_from_top_mm": 77.11642388143765,
+      "takeoff_angle_deg": 66.9428502997795
     }
   ],
   "excluded_candidates": [
@@ -192,11 +144,33 @@
     }
   ],
   "meta": {
-    "runtime_s": 1.497800588607788,
+    "runtime_s": 3.2141475677490234,
     "a_med_hu": 579.1851806640625,
     "t_vessel_hu": 472.073974609375,
     "warnings": [
-      "rejected: insufficient_extent"
+      "rejected: excessive_extent",
+      "rejected: excessive_extent",
+      "rejected: excessive_extent",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: excessive_extent",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: excessive_extent",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: too_thin"
     ]
   }
 }

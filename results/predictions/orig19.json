@@ -3,7 +3,80 @@
   "parent": {
     "instance_id": "aorta"
   },
-  "daughters": [],
+  "daughters": [
+    {
+      "instance_id": "branch_001",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        9.468815666844733,
+        -168.45432633161656,
+        266.9747742595057
+      ],
+      "seed_xyz_mm": [
+        8.6337890625,
+        -164.8662109375,
+        265.5999984741211
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.12342818739380247,
+        0.9923535006083204,
+        -0.000111297317420278
+      ],
+      "confidence": 1.0,
+      "clock_position": 7.148550593601683,
+      "arclen_from_top_mm": 44.62641164463642,
+      "takeoff_angle_deg": 89.36218251384328
+    },
+    {
+      "instance_id": "branch_002",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        14.05435161143163,
+        -166.36694580211622,
+        268.8350261505302
+      ],
+      "seed_xyz_mm": [
+        11.6337890625,
+        -163.8662109375,
+        266.5999984741211
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.519833057778159,
+        0.8404656353950782,
+        -0.1529415174534262
+      ],
+      "confidence": 1.0,
+      "clock_position": 6.0912868084332645,
+      "arclen_from_top_mm": 42.618675160744,
+      "takeoff_angle_deg": 77.45847686088648
+    },
+    {
+      "instance_id": "branch_003",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        8.945147242359196,
+        -166.403162059201,
+        297.5999984741211
+      ],
+      "seed_xyz_mm": [
+        9.6337890625,
+        -160.8662109375,
+        291.5999984741211
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.5345446698594689,
+        0.5976043824826069,
+        -0.5976043824826032
+      ],
+      "confidence": 1.0,
+      "clock_position": 6.736948031211352,
+      "arclen_from_top_mm": 11.381750471159691,
+      "takeoff_angle_deg": 65.2317705604885
+    }
+  ],
   "excluded_candidates": [
     {
       "reason": "superior_end_cap",
@@ -23,9 +96,24 @@
     }
   ],
   "meta": {
-    "runtime_s": 0.6607520580291748,
+    "runtime_s": 2.0590405464172363,
     "a_med_hu": 562.25927734375,
     "t_vessel_hu": 493.48138427734375,
-    "warnings": []
+    "warnings": [
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: too_thin",
+      "rejected: excessive_extent",
+      "rejected: excessive_extent",
+      "rejected: excessive_extent",
+      "rejected: too_thin",
+      "rejected: insufficient_extent",
+      "rejected: too_thin",
+      "rejected: excessive_extent",
+      "rejected: too_thin"
+    ]
   }
 }

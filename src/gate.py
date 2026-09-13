@@ -21,14 +21,14 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         cfg: parsed config. Uses min_extent_mm (mm), max_extent_mm (mm),
             min_radius_mm (mm), patch_area_min_mm2/patch_area_max_mm2 (mm^2),
             hu_ratio_min (unitless), tortuosity_max (unitless),
-            max_mean_cross_section_mm2 (mm^2).
+            min_mean_cross_section_mm2/max_mean_cross_section_mm2 (mm^2).
 
     Returns:
         (keep, reason): `keep` is bool. `reason` is a short string
         explaining the decision (e.g. "ok", "below_min_radius",
         "patch_too_small", "patch_too_large", "low_hu_ratio",
         "too_tortuous", "insufficient_extent", "excessive_extent",
-        "blobby_leak"), always populated and logged when
+        "too_thin", "blobby_leak"), always populated and logged when
         cfg['log_rejections'].
 
     Notes:
@@ -41,6 +41,16 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         out around ~3.5 mm radius (celiac/SMA; see docs/brief.md), so a
         candidate whose geodesic extent or average cross-section is far
         beyond that is structurally not a branch, regardless of its HU.
+
+        `too_thin` guards the opposite real failure mode: a single- or
+        few-voxel threshold speck can still clear `min_extent_mm` because
+        `instances.find_raw_branches`/`geometry.measure` route their
+        geodesic-extent search through the wall-bridging dilation
+        (`patch_bridge_mm`), which inflates a lone voxel's measured extent
+        to roughly the bridge distance regardless of the voxel's own size.
+        `mean_cross_section_mm2` is unaffected by that inflation (it only
+        counts the candidate's own voxels), so a floor on it catches the
+        noise specks that `min_extent_mm` alone cannot.
     """
     if raw.geodesic_extent_mm < float(cfg["min_extent_mm"]):
         return False, "insufficient_extent"
@@ -54,6 +64,8 @@ def accept(raw: RawBranch, geom: BranchGeom, profile: Profile, cfg: dict) -> tup
         return False, "patch_too_large"
     if raw.hu_ratio < float(cfg["hu_ratio_min"]):
         return False, "low_hu_ratio"
+    if raw.mean_cross_section_mm2 < float(cfg["min_mean_cross_section_mm2"]):
+        return False, "too_thin"
     if raw.mean_cross_section_mm2 > float(cfg["max_mean_cross_section_mm2"]):
         return False, "blobby_leak"
     if geom.tortuosity > float(cfg["tortuosity_max"]):
