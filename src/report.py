@@ -5,14 +5,18 @@ self-contained HTML report (§9.3).
 Owner: P3 (visual checks, unrolled map); P2/run.py for the JSON writer.
 """
 
+import argparse
+import json
+
 import matplotlib
+import yaml
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.io_geom import Case, mm_to_idx
-from src.aorta_frame import AortaFrame, clock_and_arclen
+from src.io_geom import Case, mm_to_idx, load_case
+from src.aorta_frame import AortaFrame, build_frame, clock_and_arclen
 
 
 def write_prediction_json(case_id: str, daughters: list, excluded: list, meta: dict, output_path: str) -> None:
@@ -234,3 +238,35 @@ def unrolled_map(case: Case, frame: AortaFrame, daughters: list, excluded: list,
     fig.tight_layout()
     fig.savefig(output_path, dpi=120)
     plt.close(fig)
+
+
+def _cli_main() -> None:
+    """CLI entry point: render one case's §9.1 verification PNG from real
+    files, for ad hoc / manual use (`eval/batch.py` is the batch path).
+
+    Usage:
+        python -m src.report --image dataset/orig1.nii --mask dataset/mask1.nii \\
+            --prediction results/subject001.json --output-png results/subject001_check.png
+    """
+    parser = argparse.ArgumentParser(description="Render the §9.1 verification PNG for one case.")
+    parser.add_argument("--image", required=True, help="Path to the CT volume (.nii or .nii.gz).")
+    parser.add_argument("--mask", required=True, help="Path to the binary aorta mask (.nii or .nii.gz).")
+    parser.add_argument("--prediction", required=True, help="Path to the prediction JSON (§5.10 schema).")
+    parser.add_argument("--output-png", required=True, dest="output_png", help="Path to write the PNG to.")
+    parser.add_argument("--config", default="config/default.yaml", help="Path to the YAML config.")
+    args = parser.parse_args()
+
+    with open(args.config, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    case = load_case(args.image, args.mask, cfg)
+    frame = build_frame(case, cfg)
+
+    with open(args.prediction, "r") as f:
+        prediction = json.load(f)
+
+    visual_check(case, frame, prediction.get("daughters", []), args.output_png, cfg)
+
+
+if __name__ == "__main__":
+    _cli_main()
