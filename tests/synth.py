@@ -1,11 +1,11 @@
 """Shared synthetic-case builder for P1's module tests (§10.6 prompts 7-9).
 
-Not the official phantom (`eval/phantom.py`, owned by P3, still a stub as of
-this writing) -- a lighter, private harness that lets instances/geometry/gate
-be built and tested end-to-end before real data or the official phantom
-exist. Swap to the real phantom or real cases once available; every module
-under test only ever sees a `Case`/`AortaFrame`/`Profile`, so nothing here is
-pipeline-specific.
+Not the official phantom (`eval/phantom.py`, now implemented and used by
+`tests/test_phantom.py`, `tests/test_report.py`, `tests/test_pipeline_integration.py`)
+-- a lighter, private harness that builds a `Case`/`Profile` pair directly,
+skipping disk I/O and `intensity.profile_aorta`, for faster unit tests of
+instances/geometry/gate. Every module under test only ever sees a
+`Case`/`AortaFrame`/`Profile`, so nothing here is pipeline-specific.
 """
 
 import numpy as np

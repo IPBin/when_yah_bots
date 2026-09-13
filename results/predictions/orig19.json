@@ -1,0 +1,31 @@
+{
+  "case_id": "orig19",
+  "parent": {
+    "instance_id": "aorta"
+  },
+  "daughters": [],
+  "excluded_candidates": [
+    {
+      "reason": "superior_end_cap",
+      "ostium_xyz_mm": [
+        12.122401898938923,
+        -172.1270805027174,
+        309.4550709378892
+      ]
+    },
+    {
+      "reason": "inferior_end_cap",
+      "ostium_xyz_mm": [
+        9.239106035915134,
+        -174.18318435263294,
+        243.7922275129759
+      ]
+    }
+  ],
+  "meta": {
+    "runtime_s": 0.6607520580291748,
+    "a_med_hu": 562.25927734375,
+    "t_vessel_hu": 493.48138427734375,
+    "warnings": []
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "case_id": "orig23",
+  "parent": {
+    "instance_id": "aorta"
+  },
+  "daughters": [
+    {
+      "instance_id": "branch_001",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        7.611585624350342,
+        -145.35884217659407,
+        246.64527159151052
+      ],
+      "seed_xyz_mm": [
+        7.642578125,
+        -141.857421875,
+        244.0
+      ],
+      "radius_mm": 2.23606797749979,
+      "direction_xyz": [
+        0.000960480966137866,
+        0.9993298814460561,
+        -0.03659051141109125
+      ],
+      "confidence": 1.0,
+      "clock_position": 6.1347339103860055,
+      "arclen_from_top_mm": 29.525066145035456,
+      "takeoff_angle_deg": 97.92436699573551
+    },
+    {
+      "instance_id": "branch_002",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        15.440483717624893,
+        -156.5226161105795,
+        248.45531016734427
+      ],
+      "seed_xyz_mm": [
+        16.642578125,
+        -157.857421875,
+        244.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        0.013800446605663205,
+        -0.15943717941028282,
+        -0.9871116114681143
+      ],
+      "confidence": 1.0,
+      "clock_position": 2.235138201645114,
+      "arclen_from_top_mm": 29.525066145035456,
+      "takeoff_angle_deg": 4.1117534459036476
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "reason": "superior_end_cap",
+      "ostium_xyz_mm": [
+        8.501068691037736,
+        -147.9894973466981,
+        275.79716981132077
+      ]
+    },
+    {
+      "reason": "inferior_end_cap",
+      "ostium_xyz_mm": [
+        7.43305431547619,
+        -155.6526599702381,
+        230.3
+      ]
+    }
+  ],
+  "meta": {
+    "runtime_s": 1.0766210556030273,
+    "a_med_hu": 382.22222900390625,
+    "t_vessel_hu": 305.39996337890625,
+    "warnings": [
+      "rejected: insufficient_extent",
+      "rejected: insufficient_extent",
+      "rejected: insufficient_extent",
+      "rejected: insufficient_extent"
+    ]
+  }
+}

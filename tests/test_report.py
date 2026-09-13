@@ -1,8 +1,10 @@
 """Smoke tests for the visual checks and unrolled map (playbook §9.1, §9.2):
 must render without crashing, including with zero detections.
 
-`clock_and_arclen` is monkeypatched because `aorta_frame.build_frame` is
-owned by P1 and not yet implemented; these tests only exercise report.py.
+`clock_and_arclen` is monkeypatched so these tests can pass a bare `object()`
+in place of a real `AortaFrame` -- they only exercise report.py's rendering,
+not `aorta_frame.build_frame` itself (see `tests/test_aorta_frame.py` and
+`tests/test_pipeline_integration.py` for that).
 """
 
 import numpy as np

@@ -1,0 +1,6 @@
+case_id,runtime_s,wall_s,peak_memory_mb,n_daughters,n_excluded_candidates,n_warnings,n_schema_errors,min_radius_mm
+orig19,0.661,0.661,64.9,0,2,0,0,0.8
+orig20,1.113,1.116,101.7,2,2,5,0,0.8
+orig21,1.498,1.502,129.1,7,2,1,0,0.8
+orig22,4.470,4.478,252.4,8,2,6,0,0.8
+orig23,1.077,1.077,213.4,2,2,4,0,0.8

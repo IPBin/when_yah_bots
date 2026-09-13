@@ -1,0 +1,202 @@
+{
+  "case_id": "orig21",
+  "parent": {
+    "instance_id": "aorta"
+  },
+  "daughters": [
+    {
+      "instance_id": "branch_001",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        11.038172828060627,
+        -172.29733431300966,
+        331.0
+      ],
+      "seed_xyz_mm": [
+        9.181640625,
+        -174.818359375,
+        332.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.7066295749701023,
+        -0.7066295749701027,
+        -0.03673264971581223
+      ],
+      "confidence": 1.0,
+      "clock_position": 11.636844836647866,
+      "arclen_from_top_mm": 102.66153703798372,
+      "takeoff_angle_deg": 61.09641554900523
+    },
+    {
+      "instance_id": "branch_002",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        15.38841085613152,
+        -171.16613784038785,
+        341.83898050353145
+      ],
+      "seed_xyz_mm": [
+        10.181640625,
+        -173.818359375,
+        334.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        0.5557906673942357,
+        0.0403260504302676,
+        0.8303436298871484
+      ],
+      "confidence": 1.0,
+      "clock_position": 11.096934994172733,
+      "arclen_from_top_mm": 91.49418063966645,
+      "takeoff_angle_deg": 177.18950606926313
+    },
+    {
+      "instance_id": "branch_003",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        22.839499220787584,
+        -168.1819438417438,
+        355.47269441327876
+      ],
+      "seed_xyz_mm": [
+        22.181640625,
+        -170.818359375,
+        356.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        -0.39570517009912864,
+        -0.8922917011184575,
+        -0.21733140240643822
+      ],
+      "confidence": 1.0,
+      "clock_position": 10.780636178541444,
+      "arclen_from_top_mm": 75.95616828572545,
+      "takeoff_angle_deg": 57.719233515305014
+    },
+    {
+      "instance_id": "branch_004",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        24.460128642472256,
+        -166.20280532977557,
+        361.788830838323
+      ],
+      "seed_xyz_mm": [
+        21.181640625,
+        -167.818359375,
+        362.0
+      ],
+      "radius_mm": 1.4142135623730951,
+      "direction_xyz": [
+        -0.32436988927195315,
+        -0.7523808926157104,
+        0.5733298940056133
+      ],
+      "confidence": 1.0,
+      "clock_position": 10.452515029097988,
+      "arclen_from_top_mm": 69.19876773683762,
+      "takeoff_angle_deg": 105.4094089897314
+    },
+    {
+      "instance_id": "branch_005",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        19.22534169429751,
+        -166.68311839341985,
+        414.33207253329186
+      ],
+      "seed_xyz_mm": [
+        20.181640625,
+        -167.818359375,
+        411.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        0.21644230340825857,
+        -0.8459796127426389,
+        -0.48731019291529515
+      ],
+      "confidence": 1.0,
+      "clock_position": 11.887318133746058,
+      "arclen_from_top_mm": 8.813838445590697,
+      "takeoff_angle_deg": 58.56870897120254
+    },
+    {
+      "instance_id": "branch_006",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        28.649377042051146,
+        -165.3533618380407,
+        337.49512034629
+      ],
+      "seed_xyz_mm": [
+        28.181640625,
+        -163.818359375,
+        333.0
+      ],
+      "radius_mm": 1.0,
+      "direction_xyz": [
+        0.06701947032641714,
+        0.18295369948307832,
+        -0.9808345092025575
+      ],
+      "confidence": 1.0,
+      "clock_position": 2.561739837017413,
+      "arclen_from_top_mm": 87.88166196694168,
+      "takeoff_angle_deg": 40.1037286227022
+    },
+    {
+      "instance_id": "branch_007",
+      "parent_instance_id": "aorta",
+      "ostium_xyz_mm": [
+        15.117876361009134,
+        -159.75203240371786,
+        402.47754005969693
+      ],
+      "seed_xyz_mm": [
+        12.181640625,
+        -160.818359375,
+        401.0
+      ],
+      "radius_mm": 1.4142135623730951,
+      "direction_xyz": [
+        -0.4345493690750253,
+        -0.08302257928383461,
+        -0.8968133011756443
+      ],
+      "confidence": 1.0,
+      "clock_position": 9.822376407161784,
+      "arclen_from_top_mm": 16.88806594735204,
+      "takeoff_angle_deg": 53.40501491359856
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "reason": "superior_end_cap",
+      "ostium_xyz_mm": [
+        16.325603473297214,
+        -155.22702810565016,
+        420.89473684210526
+      ]
+    },
+    {
+      "reason": "inferior_end_cap",
+      "ostium_xyz_mm": [
+        7.995293761531365,
+        -164.24455863699262,
+        324.13837638376384
+      ]
+    }
+  ],
+  "meta": {
+    "runtime_s": 1.497800588607788,
+    "a_med_hu": 579.1851806640625,
+    "t_vessel_hu": 472.073974609375,
+    "warnings": [
+      "rejected: insufficient_extent"
+    ]
+  }
+}

@@ -39,7 +39,15 @@ def write_prediction_json(case_id: str, daughters: list, excluded: list, meta: d
         None. Always writes a valid JSON file, even when `daughters` and
         `excluded` are empty.
     """
-    raise NotImplementedError
+    payload = {
+        "case_id": case_id,
+        "parent": {"instance_id": "aorta"},
+        "daughters": daughters,
+        "excluded_candidates": excluded,
+        "meta": meta,
+    }
+    with open(output_path, "w") as f:
+        json.dump(payload, f, indent=2)
 
 
 def _direction_idx_delta(case: Case, ostium_mm, direction_xyz, length_mm):

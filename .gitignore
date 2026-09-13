@@ -5,7 +5,11 @@ __pycache__/
 .venv/
 venv/
 data/
-results/
+results/*
+!results/predictions
+!results/predictions/**
+!results/visual_checks
+!results/visual_checks/**
 *.nii
 *.nii.gz
 !tests/**/*.nii

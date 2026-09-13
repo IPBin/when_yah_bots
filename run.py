@@ -10,7 +10,6 @@ Also accepts plain .nii for --image / --aorta-mask.
 """
 
 import argparse
-import json
 import os
 import time
 import traceback
@@ -25,6 +24,7 @@ from src.aorta_frame import AortaFrame, build_frame, clock_and_arclen
 from src.instances import find_raw_branches
 from src.geometry import measure
 from src.gate import accept, dedup
+from src.report import write_prediction_json
 
 
 def parse_args() -> argparse.Namespace:
@@ -193,8 +193,9 @@ def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
     result = run_case(args.image, args.aorta_mask, cfg)
-    with open(args.output, "w") as f:
-        json.dump(result, f, indent=2)
+    write_prediction_json(
+        result["case_id"], result["daughters"], result["excluded_candidates"], result["meta"], args.output,
+    )
 
 
 if __name__ == "__main__":
