@@ -22,6 +22,9 @@ endcap_angle_deg: 35.0      # exclude wall whose normal aligns with the axis
 iliac_margin_mm: 3.0
 iliac_fork_size_ratio: 0.3  # 2D slice components with size ratio >= this count as "comparable" (the fork)
 
+# instancing (§5.6/§5.7 component bookkeeping)
+max_branch_voxels: 50000    # skip a candidate component larger than this outright -- it's a leak into bone/organ, not a branch
+
 # branch tracing
 trace_max_mm: 10.0
 seed_arc_mm: 5.0

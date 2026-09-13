@@ -68,9 +68,18 @@ def _split_component(
     comp_mask: np.ndarray,
     patch_mask: np.ndarray,
     iso_mm: float,
+    outer_offset: np.ndarray = None,
 ) -> list:
     """One candidate component plus its (possibly multi-piece) contact patch
-    -> one or more RawBranch, via a multi-seed geodesic race (§5.7)."""
+    -> one or more RawBranch, via a multi-seed geodesic race (§5.7).
+
+    `comp_mask`/`patch_mask` may already be cropped to a local bounding box
+    by the caller (`find_raw_branches` crops before this is ever called, to
+    keep the dilation/MCP work below off the full case volume); `outer_offset`
+    is that crop's own [z,y,x] origin, added on top of the bbox this function
+    finds within its own (possibly already-local) inputs, so the returned
+    `patch_zyx`/`voxels_zyx` are always in the full case's voxel indices.
+    """
     patch_labeled, n_patches = ndimage.label(patch_mask, structure=_STRUCT_3D)
     if n_patches == 0:
         return []
@@ -133,6 +142,8 @@ def _split_component(
             continue
 
         offset = np.array([s.start for s in bbox])
+        if outer_offset is not None:
+            offset = offset + outer_offset
         patch_zyx = np.argwhere(this_patch_local) + offset
         voxels_zyx = this_voxels_local + offset
 
@@ -190,21 +201,50 @@ def find_raw_branches(
         skimage's MCP API requires seed iteration.
     """
     iso_mm = float(cfg["iso_mm"])
+    max_branch_voxels = int(cfg.get("max_branch_voxels", 50000))
 
     non_aorta = cand & ~ndimage.binary_dilation(case.aorta_np, structure=_STRUCT_3D, iterations=1)
     labeled, n_components = ndimage.label(non_aorta, structure=_STRUCT_3D)
 
+    # Both computed once, over the whole labelled volume, rather than
+    # per-component: bincount avoids an O(volume) `labeled == comp_id` size
+    # check for every component, and find_objects gives each component's
+    # bounding box directly instead of an O(volume) argwhere per component.
+    component_sizes = np.bincount(labeled.ravel(), minlength=n_components + 1)
+    component_bboxes = ndimage.find_objects(labeled)
+
     raw_branches = []
     for comp_id in range(1, n_components + 1):
-        comp_mask = labeled == comp_id
+        if component_sizes[comp_id] > max_branch_voxels:
+            # Too large to be a real branch -- a leak into bone or an
+            # enhancing organ, not worth a single expensive operation.
+            continue
+
+        # Crop to this component's own bounding box (padded) *before* any
+        # dilation: `comp_mask`/`comp_dilated` used to be full case-volume
+        # arrays even for a branch stub a few dozen voxels across, which
+        # made the dilation below (and the legal-wall AND) the dominant
+        # cost of this loop.
+        raw_bbox = component_bboxes[comp_id - 1]
+        bbox = tuple(
+            slice(max(s.start - 2, 0), min(s.stop + 2, dim))
+            for s, dim in zip(raw_bbox, labeled.shape)
+        )
+        comp_local = labeled[bbox] == comp_id
+        legal_wall_local = frame.legal_wall_np[bbox]
+
         # Dilated by 2, not 1: `non_aorta` already had a 1-voxel buffer
-        # around the aorta stripped out (below), so a component sitting
+        # around the aorta stripped out (above), so a component sitting
         # right at that buffer's edge is 2 voxels, not 1, from the nearest
         # legal wall voxel.
-        comp_dilated = ndimage.binary_dilation(comp_mask, structure=_STRUCT_3D, iterations=2)
-        patch_mask = comp_dilated & frame.legal_wall_np
-        if not patch_mask.any():
+        comp_dilated_local = ndimage.binary_dilation(comp_local, structure=_STRUCT_3D, iterations=2)
+        patch_mask_local = comp_dilated_local & legal_wall_local
+        if not patch_mask_local.any():
             continue  # doesn't touch the legal wall at all -> not an ostium
-        raw_branches.extend(_split_component(case, profile, comp_mask, patch_mask, iso_mm))
+
+        outer_offset = np.array([s.start for s in bbox])
+        raw_branches.extend(
+            _split_component(case, profile, comp_local, patch_mask_local, iso_mm, outer_offset=outer_offset)
+        )
 
     return raw_branches

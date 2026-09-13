@@ -12,8 +12,10 @@ Hard rules (see CLAUDE.md / branchseed_playbook.md §3.5 and §6):
   integer voxel index).
 """
 
+import gzip
 import logging
 import os
+import tempfile
 from dataclasses import dataclass
 
 import numpy as np
@@ -50,6 +52,38 @@ def _basename_no_ext(path: str) -> str:
         if name.endswith(ext):
             return name[: -len(ext)]
     return os.path.splitext(name)[0]
+
+
+def _read_image_tolerating_mislabeled_gzip(path: str, pixel_type) -> sitk.Image:
+    """Read a NIfTI image, falling back to gzip decompression if a plain
+    `sitk.ReadImage` fails on a file that's actually gzip-compressed but
+    doesn't carry a .gz extension (some tools compress in place without
+    renaming the file, which trips up ITK's reader).
+
+    Args:
+        path: path to the CT or mask volume.
+        pixel_type: SimpleITK pixel type to read the image as.
+
+    Returns:
+        The loaded sitk.Image.
+    """
+    try:
+        return sitk.ReadImage(path, pixel_type)
+    except RuntimeError:
+        with open(path, "rb") as f:
+            is_gzip = f.read(2) == b"\x1f\x8b"
+        if not is_gzip:
+            raise
+        logging.warning(
+            "%s: failed to read directly but is gzip-compressed; decompressing to a temp .nii.gz file.",
+            path,
+        )
+        with open(path, "rb") as f:
+            decompressed = gzip.decompress(f.read())
+        with tempfile.NamedTemporaryFile(suffix=".nii.gz", delete=False) as tmp:
+            tmp.write(decompressed)
+            tmp_path = tmp.name
+        return sitk.ReadImage(tmp_path, pixel_type)
 
 
 def _images_share_geometry(a: sitk.Image, b: sitk.Image, tol: float = 1e-3) -> bool:
@@ -89,8 +123,8 @@ def load_case(image_path: str, mask_path: str, cfg: dict) -> Case:
     """
     case_id = _basename_no_ext(image_path)
 
-    image = sitk.ReadImage(image_path, sitk.sitkFloat32)
-    mask = sitk.ReadImage(mask_path, sitk.sitkUInt8)
+    image = _read_image_tolerating_mislabeled_gzip(image_path, sitk.sitkFloat32)
+    mask = _read_image_tolerating_mislabeled_gzip(mask_path, sitk.sitkUInt8)
 
     if not _images_share_geometry(image, mask):
         logging.warning(
